@@ -1,0 +1,272 @@
+<?defined('_JEXEC') or die('Restricted access');
+if ($user->get_property('userID')==1 OR $user->get_property('gid')==25 OR get_access('admin', $_GET['component'], 'view', false)):
+	if (!empty($_GET['delete']))
+		{
+		$sql="DELETE FROM `punbb_users` WHERE `punbb_users`.`id` = ".intval($_GET['delete'])." LIMIT 1";
+		$DB->execute($sql);
+		header('Location: ?component=users&page='.$_GET['page']);
+		}
+	if (!empty($_GET['activ']))
+		{
+		$sql="UPDATE `punbb_users` SET `active` = '1' WHERE `id`='".intval($_GET['activ'])."' LIMIT 1; ";
+		$DB->execute($sql);
+		header('Location: ?component=users&page='.$_GET['page']);
+		}
+
+
+
+	if ($_POST['gredit']==1) {
+$idd=intval($_GET['edit']);
+		if(is_array($_POST['accessA']))$accessA=serialize($_POST['accessA']); else $accessA=NULL;
+		if(is_array($_POST['accessF']))$accessF=serialize($_POST['accessF']); else $accessF=NULL;
+
+$sql="UPDATE `punbb_users` SET 
+		`accessA` = '$accessA',
+		`accessF` = '$accessF'
+
+		WHERE `id` =".$idd." LIMIT 1 ;";
+	   $DB->execute($sql);
+
+//print_r($sql);exit;
+}
+	if ($_POST['update']==1) {
+	$country=intval($_POST['country']);
+	$region=intval($_POST['region']);
+	$city=intval($_POST['city']);
+
+	$idd=intval($_POST['id']);
+	$upd = $DB->getAll("SELECT * FROM punbb_users WHERE id='$idd' LIMIT 1;");
+	$group=intval($_POST['group']);
+	$phone=PHP_slashes($_POST['phone']);
+	$pass=PHP_slashes($_POST['pass']);
+	$email=PHP_slashes($_POST['email']);
+//	if ($_POST['del_ava']==1) {$SQL_PHOTO=" `photo` = '', ";@unlink($upd[0]['photo']);}
+
+	if ($err==0) {
+  	   if ($_FILES["photo"]["size"]>0) 
+		{
+		if (is_uploaded_file($_FILES['photo']['tmp_name'])) 
+			{
+			$filename = $_FILES['photo']['tmp_name'];
+			$ext = substr($_FILES['photo']['name'], 
+				1 + strrpos($_FILES['photo']['name'], "."));
+
+				if (!in_array($ext, $valid_types)) 
+					{
+					$message="Ошибка: Данный формат фото не поддерживается. <p>Выберите для загрузки фото в формате: GIF, JPG, PNG</p>";
+					} else 
+					{
+		 			$size = GetImageSize($filename);
+
+						@unlink($upd[0]['photo']);
+
+						$width=120;
+						$height=120;
+						$filesize=filesize($filename);
+						$dir="../forum/img/avatars";
+						$newname=rand(100000,99999999);
+						if (img_resize($filename, $dir."/".$idd.".$ext", $width, $height, $rgb = 0xFFFFFF, $quality = 100)) {
+
+						$message="Фото профиля обновлено.";
+						} else {
+							$message='Ошибка: Не удалось загрузить фото на сервер. Код: 0197838';
+							}
+					}
+			} else $SQL_PHOTO='';
+		} 
+	$profile=$_POST['profile'];
+	foreach ($profile as $key => $val):
+		$save_data[$key]=PHP_slashes(htmlspecialchars($val));
+	endforeach;
+	$profile=serialize($save_data);
+	$desc=PHP_slashes(htmlspecialchars($_POST['desc']));
+
+if($pass!='') {
+	$salt=$DB->getOne("SELECT salt FROM punbb_users WHERE `id` ='$idd'");
+	$password=sha1($salt.sha1($pass));
+	$sql_pass="`password` ='$password', ";
+	}
+
+$sql="UPDATE `punbb_users` SET 
+		`realname` = '".$_POST['fam']."', 
+		`group_id`='$group', $SQL_PWD $SQL_PHOTO $sql_pass
+		`wm` = '".floatval($_POST['wm'])."',
+		`desc` = '".$desc."',
+		`phone` = '".$phone."',
+		`email` = '".$email."',
+		`profile` = '".$profile."',
+		`country` = '$country',
+		`region` = '$region',
+		`city` = '$city'
+		WHERE `id` =".$idd." LIMIT 1 ;";
+	   $DB->execute($sql);
+//echo $sql;exit;
+	   $message='Данные профиля "<b>'.$upd[0]['username'].'"</b> успешно обновлены';
+	   }
+	}
+
+
+	if ($_POST['add']==1):
+//		$sql="INSERT INTO `category` (`id` ,`name`)VALUES ('', '".htmlspecialchars(strip_tags($_POST['cat_name']))."');";
+//		$DB->execute($sql);
+	endif;
+
+
+	if(isset($_POST['filter']))
+		{
+		setcookie('filter',serialize($_POST),time()+3600,'/');
+		} else {
+		$_POST=unserialize($_COOKIE['filter']);
+		}
+	if($_POST['realname']>'') $sql_filter="  and (punbb_users.username='".PHP_slashes($_POST['realname'])."' OR 
+		punbb_users.realname='".PHP_slashes($_POST['realname'])."' OR `punbb_users`.`email`='".PHP_slashes($_POST['realname'])."' )";
+
+
+//---------------------------------------------
+	$page	                = intval($_GET['page']);
+
+	// Переменная хранит число сообщений выводимых на станице 
+	$num = 25;
+	// Извлекаем из URL текущую страницу 
+	if ($page==0) $page=1;
+	// Определяем общее число сообщений в базе данных 
+	$posts = $DB->getOne("SELECT count(punbb_users.id) 
+			FROM punbb_users 
+			LEFT JOIN `group` ON `punbb_users`.`group_id`=`group`.`fgid` 
+			WHERE `punbb_users`.`id`>1 $sql_filter");
+	// Находим общее число страниц 
+	$total = intval(($posts - 1) / $num) + 1;  
+
+	// Определяем начало сообщений для текущей страницы 
+	$page = intval($page);  
+	// Если значение $page меньше единицы или отрицательно 
+	// переходим на первую страницу 
+	// А если слишком большое, то переходим на последнюю 
+	if(empty($page) or $page < 0) $page = 1; 
+	if($page > $total) $page = $total; 
+	// Вычисляем начиная к какого номера 
+	// следует выводить сообщения 
+	$start = $page * $num - $num;
+
+	// Проверяем нужны ли стрелки назад 
+	$link_url='index.php?component=users&section=default';
+	if ($page != 1) $pervpage = '<a href="'.$link_url.'&page=-1"><<</a> 
+                               <a href="'.$link_url.'&page='. ($page - 1).'"><</a> '; 
+	// Проверяем нужны ли стрелки вперед 
+	if ($page != $total) $nextpage = '  <a href="'.$link_url.'&page='. ($page + 1).'">></a>
+                                   <a href="'.$link_url.'&page='.$total.'">>></a> '; 
+	// Находим две ближайшие станицы с обоих краев, если они есть 
+	
+	if($page - 5 > 0) $page5left = ' <a href="'.$link_url.'&page='. ($page - 5) .'">'. ($page - 5) .'</a>  ';
+	if($page - 4 > 0) $page4left = ' <a href="'.$link_url.'&page='. ($page - 4) .'">'. ($page - 4) .'</a>  ';
+	if($page - 3 > 0) $page3left = ' <a href="'.$link_url.'&page='. ($page - 3) .'">'. ($page - 3) .'</a>  ';
+	if($page - 2 > 0) $page2left = ' <a href="'.$link_url.'&page='. ($page - 2) .'">'. ($page - 2) .'</a>  '; 
+	if($page - 1 > 0) $page1left = ' <a href="'.$link_url.'&page='. ($page - 1) .'">'. ($page - 1) .'</a>  '; 
+	
+	
+	if($page + 5 <= $total) $page5right = '  <a href="'.$link_url.'&page='. ($page + 5).'">'. ($page + 5) .'</a>';
+	if($page + 4 <= $total) $page4right = '  <a href="'.$link_url.'&page='. ($page + 4).'">'. ($page + 4) .'</a>';
+	if($page + 3 <= $total) $page3right = '  <a href="'.$link_url.'&page='. ($page + 3).'">'. ($page + 3) .'</a>';
+	if($page + 2 <= $total) $page2right = '  <a href="'.$link_url.'&page='. ($page + 2).'">'. ($page + 2) .'</a>'; 
+	if($page + 1 <= $total) $page1right = '  <a href="'.$link_url.'&page='. ($page + 1).'">'. ($page + 1) .'</a>';
+
+//---------------------------------------------
+	if(!empty($_GET['edit'])):
+	$profile=$DB->getAll("SELECT * FROM profile ORDER BY num ASC");
+	$profile_val=$DB->getOne("SELECT profile FROM punbb_users WHERE id=".intval($_GET['edit']));
+	$profile_val=unserialize($profile_val);
+	foreach ($profile as $val)
+		{
+		$type=explode('|',$val['type']);
+		if ($type[0]=='input') $form[]='<input class="inputbox" type="text" name="profile['.$val['id'].']" value="'.$profile_val[$val['id']].'" />';
+		if ($type[0]=='textarea') $form[]='<textarea class="inputbox" name="profile['.$val['id'].']">'.$profile_val[$val['id']].'</textarea>';
+		if ($type[0]=='select') 
+			{
+			$select='<select class="inputbox" name="profile['.$val['id'].']">';
+			$i=0;
+			foreach ($type as $t)
+				{
+				if($i==0):$i++;continue;endif;
+				$i++;
+				if($t==$profile_val[$val['id']]) $sel='selected'; else $sel=''; 
+				$select.='<option value="'.$t.'" '.$sel.'>'.$t.'</option>';
+				}
+			$select.='</select>';
+			$form[]=$select;
+			}
+		$name[]=$val['desc'];
+		}
+
+		$id=intval($_GET['edit']);
+		$sql="SELECT `punbb_users`.* FROM `punbb_users` WHERE `id`='$id'";
+		$registry['groupitem'] = $DB->getAll($sql);
+		$registry['groupitem'][0]['accessA']=unserialize($registry['groupitem'][0]['accessA']);
+		$registry['groupitem'][0]['accessF']=unserialize($registry['groupitem'][0]['accessF']);
+		$registry['groupitem'][0]['setting']=unserialize($registry['groupitem'][0]['setting']);
+
+
+	endif;
+
+$sql="SELECT `punbb_users`.*, `group`.`name` 
+			FROM `punbb_users` 
+			LEFT JOIN `group` ON `punbb_users`.`group_id`=`group`.`fgid` 
+			WHERE `punbb_users`.`id`>1
+			$sql_filter
+			order by id asc
+			LIMIT $start, $num";
+	$all = $DB->getAll($sql);
+
+
+
+
+     if($_GET['section']=='history') {
+
+	if(isset($_POST['filter']))
+		{
+		setcookie('filter',serialize($_POST),time()+3600,'/');
+		} else {
+		$_POST=unserialize($_COOKIE['filter']);
+		}
+	if($_POST['realname']>'') $sql_filter="WHERE (punbb_users.username LIKE '%".PHP_slashes($_POST['realname'])."%' OR 
+		punbb_users.realname LIKE '%".PHP_slashes($_POST['realname'])."%')";
+
+//---------------------------------------------
+	$page	                = intval($_GET['page']);
+	$num = 30;
+	if ($page==0) $page=1;
+
+	$posts = $DB->getOne("SELECT count(`sp_history`.`id`) 
+FROM `sp_history` 
+		LEFT JOIN `punbb_users` ON `punbb_users`.`id`=`sp_history`.`user` 
+ $sql_filter");
+	$total = intval(($posts - 1) / $num) + 1;  
+	$page = intval($page);  
+	if(empty($page) or $page < 0) $page = 1; 
+	if($page > $total) $page = $total; 
+	$start = $page * $num - $num;
+
+
+	$link_url='index.php?component=users&section=history';
+
+	if ($page != 1) $pervpage = '<a href="'.$link_url.'&page=-1"><<</a> 
+                               <a href="'.$link_url.'&page='. ($page - 1).'"><</a> '; 
+	if ($page != $total) $nextpage = '  <a href="'.$link_url.'&page='. ($page + 1).'">></a>
+                                   <a href="'.$link_url.'&page='.$total.'">>></a> '; 
+
+	if($page - 2 > 0) $page2left = ' <a href="'.$link_url.'&page='. ($page - 2) .'">'. ($page - 2) .'</a>  '; 
+	if($page - 1 > 0) $page1left = '<a href="'.$link_url.'&page='. ($page - 1) .'">'. ($page - 1) .'</a>  '; 
+	if($page + 2 <= $total) $page2right = '  <a href="'.$link_url.'&page='. ($page + 2).'">'. ($page + 2) .'</a>'; 
+	if($page + 1 <= $total) $page1right = '  <a href="'.$link_url.'&page='. ($page + 1).'">'. ($page + 1) .'</a>';
+
+
+        $registry['history']=$DB->getAll("SELECT sp_history.* , `punbb_users`.`username`
+		FROM sp_history
+		LEFT JOIN `punbb_users` ON `punbb_users`.`id`=`sp_history`.`user` 
+		$sql_filter
+		ORDER BY sp_history.id DESC LIMIT $start, $num");
+
+	
+     }
+
+
+endif;

@@ -1,0 +1,186 @@
+@media screen and (max-width: 450px){
+    .inputbox-container{
+        font: 25px Tahoma;
+        color: #131242;
+    }
+    .inputbox{
+        background-color: white;
+        border: 1px solid #D7D7D7;
+        width: 450px;
+        height: 25px;
+        font: 23px tahoma;
+    }
+    .inputbox:hover{
+        border: 1px solid blue; width: 450px; height: 25px;
+    }
+    .newstitle {
+        font:bold 20px tahoma;
+        color: #69696f;
+        display:block;
+        margin:0 0 10px 0;
+    }
+    .pushme{
+        width: 260px;
+        font: bold 20px tahoma;
+        color: blue;
+        border-radius: 5px;
+        padding-bottom: 5px;
+    }
+    .btn-addOrder{
+        font-size: 23px;
+        margin: 30px 0px 0px 300px;
+    }
+    .btn-cancel{
+        margin: 30px 0px 0px 100px;
+    }
+    .text-cancel{
+        font-size: 23px;
+    }
+    .addrorder {
+        position:relative;
+        display:block;
+        padding:0px 0px 0px 35px;
+        width:300px;
+        background-image:url(../images/addorder.png);
+        background-repeat:no-repeat;
+        background-position:0 8px;
+        font:bold 36px arial;
+        color:#298616;
+        margin:10px 0;
+    }
+    .addrorder:hover {
+        font:bold 38px arial;
+        color: red;
+    }
+    .exports-moderate{
+        display: none;
+    }
+    .org-status{
+        font-size: 28px;
+        margin-bottom: 30px;
+        display: inline-block;
+        padding: 7px 16px 11px 13px;
+    }
+    .menu-body5 h1{
+        font:bold 24px arial;
+    }
+    .table-org{
+        border-spacing: 0 25px;
+    }
+    #banner_head{
+        top:150px;
+    }
+    #top-menu{
+        margin-top: 248px;
+    }
+    .content-body{
+        padding-top: 133px;
+    }
+    #login #modlgn_username, #login #modlgn_passwd{
+        height: 27px;
+        margin-bottom: 15px;
+        display: block;
+        margin-left: 160px;
+        font: 20px arial;
+    }
+    #login .reg-a{
+        font: bold 24px arial;
+        margin: 46px 0px 0px -170px;
+    }
+    #login .inputbox_signin{
+        top:108px;
+        width: 80px;
+        height: 26px;
+        font: 20px arial;
+        right: 100px;
+        background-image: url(../images/button_login_mob.png);
+    }
+    #logo1_city{
+        background-image:url(../images/l_banner_mob.png);
+        height: 148px;
+    }
+    #logo2{
+        background-image:url(../images/c_banner_mob.png);
+        width: 371px;
+        height: 148px;
+    }
+    #login{
+        background-image:url(../images/r_banner_mob.png);
+        width: 354px;
+        height: 148px;
+    }
+    .logout, .logout2{
+        top:61px;
+        width: 80px;
+        height: 25px;
+        font: 20px arial;
+        left: 250px;
+        padding-left: 11px;
+        background-image: url(../images/button_login_mob.png);
+    }
+    .adminlink{
+        top: 110px;
+        right: 270px;
+        font: bold 21px arial;
+    }
+    #hello{
+        top: 17px;
+        left: 100px;
+    }
+    #search .search_input{
+        display: none;
+    }
+    #search #submit{
+        display: none;
+    }
+    .hello-name{
+        font: bold 20px "Arial";
+        font-size: 25px;
+    }
+    .pagenation a{
+        padding: 10px 12px;
+        font-size: 20px;
+    }
+    .pagenation span{
+        padding: 10px 12px;
+        font-size: 20px;
+    }
+    .backToOpen-side{
+        right: -12px;
+        padding: 2px 27px 6px 14px;
+        font: bold 13px arial;
+        width: 71px;
+    }
+    .add_menu{
+        right: -20px;
+        top: 30%;
+    }
+    .edit_menu{
+        right: -20px;
+    }
+    .mod_menu{
+        right: -20px;
+        top:50%;
+    }
+    #top-menu{
+        height: 50px;
+        grid-gap: 52px;
+    }
+    #top-menu a{
+        font: bold 23px arial;
+        height: 26px;
+        width: 110px;
+    }
+    #top-menu .region-a{
+        display: none;
+    }
+    .content-body{
+        padding-top: 165px;
+    }
+    .styled-select-order-status{
+        height: 34px;
+    }
+    .styled-select-order-status select{
+        height: 34px;
+    }
+}

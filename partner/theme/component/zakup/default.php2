@@ -1,0 +1,179 @@
+<? if ($user->get_property('userID') == 3 OR $user->get_property('userID') == 7): ?>
+    <script type="text/javascript" src="/partner/theme/component/zakup/changeStatus.js"></script>
+
+    <div class="d-flex justify-content-center">
+        <h3>Управление закупками</h3>
+    </div>
+
+    <!--<style>
+        .filtr-all {
+            font-size: large;
+            background-color: rgb(230, 230, 230);
+            border-radius: 3px;
+            padding: 3px;
+            line-height: 30px;
+        }
+
+        .filtr {
+            background-color: rgb(225, 225, 225);
+            border-radius: 3px;
+            padding: 3px;
+            line-height: 30px;
+        }
+    </style>-->
+
+    <div id="sort" style="border-bottom: 4px double gray"><b>Фильтр:</b>
+        <a href="index.php?component=zakup" <? if (empty($_GET['status']) and empty($_GET['check'])): ?><? endif ?>
+           class="filtr-all"> Все </a>
+        <div>
+            <? foreach ($statuslist as $it): ?>
+                <a href="index.php?component=zakup&status=<?= $it['id'] ?>" <? if ($it['id'] == $_GET['status']): ?><? endif ?>
+                   class="filtr"><?= $it['name']; ?> </a>
+            <? endforeach ?>
+        </div>
+    </div>
+
+    <!-- Search of purchase -->
+    <form action="" method="post" style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 4px double gray">
+        Поиск закупки:
+        <input type="hidden" name="filter" value="1"/>
+        <input type="text" class="inputbox" name="search" value=""/>
+        <input type="submit" class="btn btn-outline-primary btn-sm" value="ок"/>
+    </form>
+
+    <!-- Верхние кнопки страниц -->
+    <div><? if ($total > 1) echo '<p><div class="pagenation" align="center" style="margin-bottom:10px; margin-top:10px;">'
+            . $pervpage . $page2left . $page1left . '<span>' . $page . '</span>' . $page1right . $page2right
+            . $nextpage . '</div></p>'; ?>
+    </div>
+
+    <table class="table table-striped table-sm">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Закупка</th>
+            <th scope="col" style="width: 100px;">Регион,<br> Город</th>
+            <th scope="col" style="width: 200px;">Действие</th>
+        </tr>
+        </thead>
+
+        <? if (count($items) == 0): ?>
+            <tr>
+                <td>С данным статусом закупок нет</td>
+            </tr><? endif ?>
+
+        <? foreach ($items as $item):
+
+            $query = "SELECT IF(punbb_users.display_name != '', punbb_users.display_name, punbb_users.username) AS username,`cities`.`city_name_ru`,`regions`.`region_name_ru` 
+		FROM `punbb_users` LEFT
+		JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
+		JOIN `regions` ON `cities`.`id_region`= `regions`.`id_region`
+		WHERE punbb_users.id='{$item['user']}'";
+            $data = $DB->getAll($query);
+
+            if (empty($_GET['check'])) {
+                if (!empty($item['foto'])) {
+                    $split = explode('/', $item['foto']);
+                    $img_path = '/images/' . $split[2] . '/125/100/1/' . $split[3];
+                } else $img_path = '/' . $theme . 'images/no_photo125x100.png';
+
+                ?>
+                <tbody>
+                <tr>
+                    <td style="width: 350px;">
+                        <table class="table table-sm" style="background-color: #f4f3f3">
+                            <tr>
+                                <td><img src="<?= $img_path ?>" alt="Название закупки"
+                                         style="width: 125px; height: 100px;"/></td>
+                                <td><a href="/com/org/open/<?= $item['id'] ?>"><?= $item['title'] ?></a><br/>
+                                    Минималка: <?= $item['min'] ?><br/>
+                                    Орг. проц.: <?= $item['proc'] ?><br/>
+                                    Организатор: <a href="/com/profile/default/<?= $item['user'] ?>"><?= $data[0]['username'] ?></a>
+                                    <br>
+sp_zakup.status = <b><?=$item['status'];?></b><br>
+<u>item['id'] = <?=$item['id'];?></u><br>
+item['status'] = <?=$item['status'];?><br>
+item['name'] = <?=$item['name'];?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td><?= $data[0]['region_name_ru'] ?>, <?= $data[0]['city_name_ru'] ?></td>
+
+                    <td>
+                        <table class="table" style="background-color: #f4f3f3">
+                            <tr>
+                                <td valign="top" width="130">
+                                    <ul style="margin-left:-10px;">
+                                        <? if ($item['status'] == 2): ?>
+                                            <li><a href="?component=zakup&section=add&id=<?= $item['id'] ?>"
+                                                   class="news_body_a">Принять</a></li>
+                                            <li><a href="?component=zakup&section=del&id=<?= $item['id'] ?>"
+                                                   class="news_body_a">Удалить</a></li>
+                                        <? endif ?>
+                                        <li><a href="/com/message/new/<?= $item['user'] ?>" class="news_body_a">Написать
+                                                Оргу</a></li>
+                                    </ul>
+                                <td valign="top">
+                                    <form action="?section=default&component=zakup&page=<?= $_GET['page'] ?>&status=<?= $_GET['status'] ?>&check=<?= $_GET['check'] ?>#zp<?= $item['id'] ?>"
+                                          method="post">
+                                        <input type="hidden" name="zakup" value="<?= $item['id'] ?>"/>
+                                        <input type="hidden" name="change" value="1"/>
+
+                                        <div style="width: 180px;">
+                                            <div>Статус<br/>
+                                                <select name="status" class="custom-select">
+                                                        <option value="1" <? if ($item['status'] == 1): ?>selected<? endif ?>>редактирование</option>
+                                                        <option value="2" <? if ($item['status'] == 2): ?>selected<? endif ?>>готова к открытию</option>
+                                                        <option value="3" <? if ($item['status'] == 3): ?>selected<? endif ?>>открыта</option>
+                                                        <option value="4" <? if ($item['status'] == 4): ?>selected<? endif ?>>стоп</option>
+                                                        <option value="5" <? if ($item['status'] == 5): ?>selected<? endif ?>>дозаказ</option>
+                                                        <option value="6" <? if ($item['status'] == 6): ?>selected<? endif ?>>оплата закаов</option>
+                                                        <option value="7" <? if ($item['status'] == 7): ?>selected<? endif ?>>отправлена</option>
+                                                        <option value="8" <? if ($item['status'] == 8): ?>selected<? endif ?>>оплата за доставку</option>
+                                                        <option value="9" <? if ($item['status'] == 9): ?>selected<? endif ?>>закрыта</option>
+                                                        <option value="10" <? if ($item['status'] == 10): ?>selected<? endif ?>>раздача</option>
+                                                </select>
+                                            </div>
+
+                                            <div style="margin-top: 10px;">Организатор<br/>
+                                                <select name="user" class="custom-select">
+                                                    <? foreach ($orglist as $it): ?>
+                                                        <option value="<?= $it['id'] ?>"
+                                                                <? if ($it['id'] == $item['user']): ?>selected<? endif ?>><?= $it['username']; ?></option>
+                                                    <? endforeach ?>
+                                                </select>
+                                            </div>
+                                            <div><input class="btn btn-outline-primary btn-sm"
+                                                        style="margin: 20px 0 0 93px;" type="submit" value="Сохранить"/>
+                                            </div>
+                                        </div>
+                                        <!--			<a href="?component=zakup&section=del&id=<?= $item['id'] ?>&check=1" class="news_body_a">удалить из закрепленных</a><br/>
+			<a href="?component=zakup&section=del&id=<?= $item['id'] ?>&check=2" class="news_body_a">удалить с закупкой</a>-->
+
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+                </tbody>
+            <? } ?>
+        <? endforeach ?>
+    </table>
+    <br/>
+
+    <!-- Нижние кнопки страниц -->
+    <div><? if ($total > 1) echo '<p>	<div class="pagenation" align="center" style="margin-bottom:10px; margin-top:10px;
+								width: 800px; border-bottom: 4px double gray;"">'
+            . $pervpage . $page2left . $page1left . '<span>' . $page . '</span>' . $page1right . $page2right
+            . $nextpage . '</div></p>'; ?>
+    </div>
+    <br/>
+    <div class="sort">
+        <a href="index.php?component=zakup&check=all" <? if (!empty($_GET['check'])): ?>class="selected"<? endif ?>>Смотреть
+            список закрепленых закрепленых поставщиков за оргами</a>
+    </div>
+<? endif; ?>
+

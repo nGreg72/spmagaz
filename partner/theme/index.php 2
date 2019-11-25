@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title><?= $page_title; ?></title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="generator" content="rcheCMS"/>
+    <link href="<?= $theme_admin; ?>css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="<?= $theme_admin; ?>css/navi.css" rel="stylesheet" type="text/css"/>
+    <link href="<?= $theme_admin; ?>css/tabbs.css" rel="stylesheet" type="text/css"/>
+    <script language="JavaScript" type="text/javascript" src="<?= $theme_admin; ?>js/open.js"></script>
+    <script language="JavaScript" type="text/javascript" src="<?= $theme_admin; ?>js/func.js"></script>
+    <script language="JavaScript" type="text/javascript" src="<?= $theme_admin; ?>js/tabbs.js"></script>
+    <script language="JavaScript" type="text/javascript" src="<?= $theme_admin; ?>js/jquery-3.2.1.min.js"></script>
+    <link rel="shortcut icon" href="/<?= $theme; ?>images/Site_Icon.ico" type="image/x-icon"/>
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+
+</head>
+<body>
+
+
+        <div class="container">
+            <? if ($user->get_property('userID') == 1 OR $user->get_property('gid') >= 22): ?>
+                <div class="navbar navbar-dark bg-dark sticky-top" style="width: 900px;">
+                    <a href="../index.php" class="btn btn-primary">На сайт</a>
+                    <a href="<?= $root_path ?>" class="btn btn-secondary">Админская зона</a>
+                    <a href="/?logout=1" class="btn btn-secondary">Нафиг</a>
+                </div>
+            <? endif; ?>
+
+            <div id="wrapper">
+                <div id="content">
+                    <? require_once($contents_view) ?>
+                </div>
+            </div>
+        </div>
+
+
+
+
+<!-- GoogleAnalytics-->
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-57968694-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+<!--GoogleAnalytics-->
+
+</body>
+</html>

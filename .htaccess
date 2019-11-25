@@ -1,0 +1,81 @@
+# php_value display_errors 1
+# php_value error_reporting 2047
+
+# php_value session.save_path /home/u493783/liby.site/tmp/
+#php_value session.gc_maxlifetime 10800
+#php_value session.cookie_lifetime 10800
+
+RewriteEngine On
+Options +FollowSymLinks
+Options -Indexes
+
+
+#RewriteBase /
+
+#400 -  Bad Request
+ErrorDocument 400 /index.php?component=doc&section=default&value=err400
+ 
+#404 - Not Found
+ErrorDocument 404 /index.php?component=doc&section=default&value=err404
+ 
+#Bad Gateway
+ErrorDocument 502 "Sorry, Technical work on server"
+
+#Bad Gateway
+ErrorDocument 504 "Sorry, Technical work on server"
+
+DirectoryIndex index.php
+
+
+#  Редирект index.php на root / (заменить osrealty.ru на свой домен)
+
+#RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.php\ HTTP/
+#RewriteRule ^index\.php$ http://example.ru/ [R=301,L]
+
+#  Редирект на домен без www (заменить osrealty.ru на свой домен)
+
+#RewriteCond %{HTTP_HOST} ^www.example\.ru$ [NC]
+#RewriteRule ^(.*)$ http://example.ru/$1 [R=301,L]
+
+RewriteRule ^sitemap.xml /sitemap.php [L]
+
+AddDefaultCharset UTF-8
+
+RewriteCond %{REQUEST_FILENAME} !-f
+
+RewriteRule ^forum/register.php+$ /access.html [L]
+RewriteRule ^forum/userlist.php+$ /access.html [L]
+
+# img thumb
+#RewriteRule ^images/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/phpThumb.php?src=../img/uploads/$1/$5&w=$2&h=$3&zc=$4  [L]
+#RewriteRule ^images/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/phpThumb.php?src=../img/uploads/$1/$2/$6&w=$3&h=$4&zc=$5  [L]
+#RewriteRule ^images/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/phpThumb.php?src=../img/uploads/$1/$2/$3/$7&w=$4&h=$5&zc=$6  [L]
+
+# img thumb optimized
+RewriteRule ^images/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/thumb.php?src=../img/uploads/$1/$5&w=$2&h=$3&zc=$4  [L]
+RewriteRule ^images/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/thumb.php?src=../img/uploads/$1/$2/$6&w=$3&h=$4&zc=$5  [L]
+RewriteRule ^images/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9]+)/([0-9]+)/([0-9]+)/([0-9]+)/([^/]*)(/?)+$ /lib/thumb.php?src=../img/uploads/$1/$2/$3/$7&w=$4&h=$5&zc=$6  [L]
+
+RewriteRule ^com/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)(/?)+$ /index.php?component=$1&section=$2&value=$3&value2=$4&value3=$5  [L,QSA]
+RewriteRule ^com/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)(/?)+$ /index.php?component=$1&section=$2&value=$3&value2=$4  [L,QSA]
+RewriteRule ^com/([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z]+)(/?)+$ /index.php?component=$1&section=$2&value=$3  [L,QSA]
+RewriteRule ^com/([0-9A-Za-z]+)/([0-9A-Za-z]+)(/?)+$ /index.php?component=$1&section=$2  [L,QSA]
+RewriteRule ^com/([0-9A-Za-z]+)(/?)+$ /index.php?component=$1 [L,QSA]
+RewriteRule ^doc/([0-9A-Za-z_-]+)/([0-9A-Za-z_-]+)\.html$ /index.php?component=doc&dcat=$1&ditem=$2 [L]
+RewriteRule ^doc/([0-9A-Za-z_-]+)\.html$ /index.php?component=doc&dcat=$1 [L]
+RewriteRule ^blog/([0-9]+)(/?)+$ /index.php?component=blog&id=$1 [L]
+RewriteRule ^rss/([0-9A-Za-z_-]+)(/?)+$ /index.php?component=rss&dcat=$1 [L]
+RewriteRule ^rss/ /index.php?component=rss [L]
+RewriteRule ^tags/([0-9A-Za-z_-]+)(/?)+$ /index.php?component=doc&dtag=$1 [L]
+RewriteRule ^docu/([0-9A-Za-z_-]+)(/?)+$ /index.php?component=doc&docu=$1 [L]
+RewriteRule ^arch/([0-9]+)(/?)+$ /index.php?component=doc&arch=$1 [L]
+RewriteRule ^cal/([0-9]+)(/?)+$ /index.php?component=doc&cal=$1 [L]
+RewriteRule ^admin(/?)+$ /index.php  [L]
+RewriteRule ^partner/theme/js/tinymce/plugins/images/connector/php(/?)+$ /partner/theme/js/tinymce/plugins/images/connector/php/index.php  [L]
+
+
+RewriteRule ^([0-9A-Za-z]+)/([0-9A-Za-z]+)/([0-9A-Za-z_-]+)(/?)+$ /index.php?component=frontpage&section=default&city=$1&catz=$2&page=$3  [L]
+RewriteRule ^([0-9A-Za-z]+)/([0-9A-Za-z_-]+)(/?)+$ /index.php?component=frontpage&section=default&city=$1&catz=$2  [L]
+
+# AddType application/x-httpd-php .py
+AddHandler cgi-script .py
