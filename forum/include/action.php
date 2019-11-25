@@ -13,7 +13,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $url = 'https://www.google.com/recaptcha/api/siteverify';
 
-    $secret = '6LfyBhATAAAAAOqfj4RXNmRV5RV_8SIN-S95wl1U';
+ 
     $recaptcha = $_POST['g-recaptcha-response'];
     $ip = $_SERVER['REMOTE_ADDR'];
 
