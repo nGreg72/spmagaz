@@ -1,4 +1,11 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
+
+<!--Вычисляем досупный остаток товара в рядах-->
+<? include "calculate_remains.php";
+$obg = new calculate_remains();
+$remains = $obg->get_remains($items[0]['id_ryad'])
+;?>
+
 <? if ($user->get_property('userID') > 0): ?>
     <? if (count($items) > 0): ?>
         <? if (empty($message) and empty($oke)): ?>
@@ -54,6 +61,7 @@
                 <form action="" method="post">
                     <input type="hidden" name="action" value="editorder">
                     <input type="hidden" name="idd" value="<?= intval($_GET['value']); ?>">
+                    <input type="hidden" name="remains" value="<?=$remains?>">
                     <table summary="" style="line-height: 1.8;">
                         <tr>
                             <td valign="top" width="100"><b>Название</b></td>
@@ -109,7 +117,8 @@
                             <td valign="top"><b>Количество</b></td>
                             <td><input type="text" class="inputbox" style="width:200px;" name="kolvo"
                                        value="<?= $items[0]['kolvo']; ?>">
-                                <br/>пример: 3
+                                <br/>
+                                <span style="background-color: #fdcdcd">Доступно для заказа : <b><?=$remains?></b> шт.</span>
                             </td>
                         </tr>
                         <tr>

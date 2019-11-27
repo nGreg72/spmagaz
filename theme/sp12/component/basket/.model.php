@@ -85,10 +85,19 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $totalprice = 0;
             if (count($order[$zp['id']]) > 0) {
                 foreach ($order[$zp['id']] as $ord):
+
                     if ($ord['kolvo'] == 0) $ord['kolvo'] = 1;
+
                     if ($ord['status'] == 2 || $ord['status'] == 7) continue;
+
+//                  Заказы во временно отключенных рядах не учитываются
+                    if ($ord['tempOff'] == 1) continue;
+
+//                  Считаются заказы во всех статусах, кроме 'Отказано' и 'Нет в наличии'
                     if ($ord['status'] != 2 AND $ord['status'] != 7) $totalprice = $totalprice + ($ord['price'] * $ord['kolvo']) + $ord['tpr'];
-//		            if($ord['status'] == 0 OR $ord['status'] == 1 OR $ord['status'] == 9)$totalprice=$totalprice+($ord['price']*$ord['kolvo'])+$ord['tpr'];  // В корзине пользователя будут суммироваться ТОЛЬКО заказы со статусом "Включено в счёт" и "Прибыл"
+
+//		            if($ord['status'] == 0 OR $ord['status'] == 1 OR $ord['status'] == 9)$totalprice=$totalprice+($ord['price']*$ord['kolvo'])+$ord['tpr'];
+//                  В корзине пользователя будут суммироваться ТОЛЬКО заказы со статусом "Включено в счёт" и "Прибыл"
                 endforeach;
             } else $order[$zp['id']] = null;
             $totalzp[$zp['id']] = $totalprice;
@@ -154,32 +163,33 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         } else $basketStatus = "and $basketStatus";
         $id = intval($_GET['value']);
         if ($_GET['section'] == 'addpay' or $_GET['section'] == 'paywm') $basketStatus = "and `sp_zakup`.`id`='$id'";
-        $sql = "	SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`paytype`,`sp_zakup`.`user`,`sp_zakup`.`text`,`sp_zakup`.`min`,`sp_zakup`.`proc`
-		,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
-		`sp_zakup`.`foto`,`sp_zakup`.`type`,`sp_zakup`.`office`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
-		(select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
-	FROM `sp_zakup`
-	LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
-	JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
-	JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
-	JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
-	WHERE `sp_order`.`user`='{$user->get_property('userID')}'
-		$basketStatus	
-	GROUP BY `sp_zakup`.`id`
-	ORDER BY `sp_zakup`.`id` DESC
-	";
+        $sql = "SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`paytype`,`sp_zakup`.`user`,`sp_zakup`.`text`,`sp_zakup`.`min`,`sp_zakup`.`proc`
+                ,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
+                `sp_zakup`.`foto`,`sp_zakup`.`type`,`sp_zakup`.`office`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
+                (select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
+                FROM `sp_zakup`
+                LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
+                JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
+                JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
+                JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
+                WHERE `sp_order`.`user`='{$user->get_property('userID')}'
+                    $basketStatus	
+                GROUP BY `sp_zakup`.`id`
+                ORDER BY `sp_zakup`.`id` DESC
+                ";
         $zakup = $DB->getAll($sql);
+
         foreach ($zakup as $zp):
             if ($zp['type'] == 1 and $_GET['status'] > 0) {
                 $statustovar = "and `sp_order`.`status` IN ($whord)";
             } else $statustovar = '';
             $sql = "  select `sp_order`.*,`sp_order`.`message` AS `msg`,`sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`autoblock`,`sp_ryad`.`allblock`,
-	`sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
-	`sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
-	from `sp_order` 
-	JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
-	JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
-	where `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
+	                `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
+	                `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
+	                from `sp_order` 
+	                JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
+	                JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
+	                where `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
             $order[$zp['id']] = $DB->getAll($sql);
             $totalprice = 0;
             if (count($order[$zp['id']]) > 0) {
@@ -252,7 +262,7 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $DB->execute($sql);
             //fldop - это значит доплата
             $sql = "INSERT INTO `sp_addpay` (`zp_id`,`user`,`date`,`date_user`,`summ`,`card`,`fldop`,`transp`,`bankName`,`whoPay`) 
-	        VALUES ('$idzp','{$user->get_property('userID')}','$date','$date_user','$amount','$card','$fldop','$transp','$bankName','$whoPay')";
+	                VALUES ('$idzp','{$user->get_property('userID')}','$date','$date_user','$amount','$card','$fldop','$transp','$bankName','$whoPay')";
 //print_r($sql); die();
             $DB->execute($sql);
             header("Location: /com/basket/?status=" . $_POST['status']);
@@ -288,13 +298,14 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
                 $statustovar = "and `sp_order`.`status` IN ($whord)";
             } else $statustovar = '';
             $sql = "  select `sp_order`.*,`sp_order`.`message` AS `msg`,`sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`autoblock`,`sp_ryad`.`allblock`,
-	        `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
-	        `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
-	        from `sp_order` 
-	        JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
-	        JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
-	        WHERE `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
+	                `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
+	                `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
+	                from `sp_order` 
+	                JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
+	                JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
+	                WHERE `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
             $order[$zp['id']] = $DB->getAll($sql);
+
             $totalprice = 0;
             if (count($order[$zp['id']]) > 0) {
                 foreach ($order[$zp['id']] as $ord):
@@ -353,13 +364,14 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
                 $statustovar = "and `sp_order`.`status` IN ($whord)";
             } else $statustovar = '';
             $sql = "  select `sp_order`.*,`sp_order`.`message` AS `msg`,`sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`autoblock`,`sp_ryad`.`allblock`,
-	        `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
-	        `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
-	        from `sp_order` 
-	        JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
-	        JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
-	        WHERE `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
+	                `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_size`.`name` as `sizename`,
+	                `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
+	                from `sp_order` 
+	                JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
+	                JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
+	                WHERE `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' $statustovar";
             $order[$zp['id']] = $DB->getAll($sql);
+
             $totalprice = 0;
             if (count($order[$zp['id']]) > 0) {
                 foreach ($order[$zp['id']] as $ord):
@@ -408,9 +420,9 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         $zakup = $DB->getAll($sql);
         if ($zakup[0]['dost'] > 0 and $zakup[0]['status'] > 3):
             $query = "SELECT `sp_ryad`.`price`,`sp_order`.`kolvo`
-	    FROM `sp_order` 
-	    LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
-	    WHERE `sp_order`.`id_zp` = " . $idzp;
+	                  FROM `sp_order` 
+	                  LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
+	                  WHERE `sp_order`.`id_zp` = " . $idzp;
             $tp = $DB->getAll($query);
             $totalprice = 0;
             foreach ($tp as $t) {
@@ -505,13 +517,15 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
     }
     if ($_GET['section'] == 'editorder') {
         $id_order = intval($_GET['value']);
-        $query = "SELECT `sp_order`.*, `sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`price`,`sp_size`.`anonim`,`sp_size`.`name` as `sizename`,
-			`sp_size`.`id` as 'idsize'
-		  FROM `sp_order`
-		  LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
-		  JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
-		  WHERE `sp_order`.`id` = '" . $id_order . "' and `sp_order`.`user`='" . $user->get_property('userID') . "'";
+        $query = "SELECT `sp_order`.*, `sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`price`,
+                  `sp_size`.`anonim`,`sp_size`.`name` as `sizename`, `sp_size`.`id` as 'idsize'
+                  FROM `sp_order`
+                  LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
+                  JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
+                  WHERE `sp_order`.`id` = '" . $id_order . "' and `sp_order`.`user`='" . $user->get_property('userID') . "'";
         $items = $DB->getAll($query);
+
+
         if ($_POST['action'] == 'editorder') {
             $text = PHP_slashes($_POST['textarea1']);
             $color = PHP_slashes(htmlspecialchars(strip_tags($_POST['color'])));
@@ -523,24 +537,33 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $title = PHP_slashes(htmlspecialchars(strip_tags($_POST['title'])));
             $articul = intval($_POST['articul']);
             $anonim = intval($_POST['isAnonim']);
+            $remains = intval($_POST['remains']);
+
+        if ( $remains - $kolvo >= 0 ) {
             $query = "UPDATE `sp_order` SET
-			`message` = '$text',
-			`color` = '$color',
-			`kolvo` = '$kolvo'
-			WHERE `sp_order`.`id` ='$idd' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
+                      `message` = '$text',
+                      `color` = '$color',
+                      `kolvo` = '$kolvo'
+                      WHERE `sp_order`.`id` ='$idd' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
             $DB->execute($query);
             $query = "UPDATE `sp_size` SET
-			`anonim` = '$anonim',
-			`name` = '$size'
-			WHERE `sp_size`.`id` ='" . $items[0]['idsize'] . "' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
+			          `anonim` = '$anonim',
+			          `name` = '$size'
+			          WHERE `sp_size`.`id` ='" . $items[0]['idsize'] . "' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
             $DB->execute($query);
             $query = "UPDATE `sp_ryad` SET
-			`price` = '$price',
-			`title` = '$title',
-			`articul` = '$articul'
-			WHERE `sp_ryad`.`id` ='" . $items[0]['id_ryad'] . "';";
+                      `price` = '$price',
+                      `title` = '$title',
+                      `articul` = '$articul'
+                      WHERE `sp_ryad`.`id` ='" . $items[0]['id_ryad'] . "';";
             $DB->execute($query);
+        }
+        else {
+            echo $message = "Вы пытаетесь заказать больше, чем есть в коробке! Свяжитесь с организатором!";
+        }
+
             $oke = 1;
         }
+
     }
 endif;

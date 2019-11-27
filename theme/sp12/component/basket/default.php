@@ -192,9 +192,9 @@ if(count($addpay[$zp['id']])==0):?>
 
                                         <? if ($zp['dost'] > 0 and $zp['status'] > 3) {
                                             $query = "SELECT `sp_ryad`.`price`,`sp_order`.`kolvo`,`sp_order`.`status`
-		    FROM `sp_order` 
-		    LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
-		    WHERE `sp_order`.`id_zp` = '{$zp['id']}' and `sp_order`.`status` != '2' and `sp_order`.`status` != '7'";
+                                                        FROM `sp_order` 
+                                                        LEFT JOIN `sp_ryad` ON `sp_order`.`id_ryad`=`sp_ryad`.`id`
+                                                        WHERE `sp_order`.`id_zp` = '{$zp['id']}' and `sp_order`.`status` != '2' and `sp_order`.`status` != '7'";
                                             $tp = $DB->getAll($query);
                                             $totalprice = 0;
                                             foreach ($tp as $t) {
@@ -317,13 +317,17 @@ if(count($addpay[$zp['id']])==0):?>
                                 <td width="245">
                                     <div class="info-top"></div>
                                     <div class="info-mid">
-                                        <b>Сумма</b>: <?= $totalzp[$zp['id']] * $zp['curs']; ?> <?= $registry['valut_name'] ?> <? if ($zp['curs'] <> 1): ?>(<?= $totalzp[$zp['id']] ?> у.е.)<? endif; ?>
+                                        <b>Сумма</b>: <?= $totalzp[$zp['id']] * $zp['curs']; ?> <?= $registry['valut_name'] ?>
+                                        <? if ($zp['curs'] <> 1): ?>(<?= $totalzp[$zp['id']] ?> у.е.)
+                                        <? endif; ?>
                                         <br/>
-                                        <? if ($zp['proc'] > 0): ?><b>Оргсбор</b>: <?= $zp['proc'] ?>%<br/><? endif ?>
+
+                                        <? if ($zp['proc'] > 0): ?><b>Оргсбор</b>: <?= $zp['proc'] ?>%<br/>
+                                        <? endif ?>
 
                                         <? if ($userdost): ?><b
                                                 title="от поставщика до организатора, делится на всех участников">
-                                            Доставка</b>: <?= $userdost ?> <?= $registry['valut_name'] ?><br/>
+                                                Доставка</b>: <?= $userdost ?> <?= $registry['valut_name'] ?><br/>
                                         <? endif; ?>
 
 
@@ -372,20 +376,20 @@ if(count($addpay[$zp['id']])==0):?>
                             <td width="50%" class="title" style="text-indent: 97px;">Название</td>
                             <td width="10%" class="title" align="center">Цена/Наценка</td>
                             <td width="10%" class="title" align="center">Кол-во</td>
-                            <td class="title" align="center">Размер</td>
+                            <td class="title" align="center">В коробке</td>
                             <td width="2%" class="title" align="center">Цвет</td>
                             <td width="10%" class="title" align="center">Статус</td>
                             <td class="title" align="center">Удалить <br> заказ</td>
                         </tr>
                         <? foreach ($order[$zp['id']] as $ord): ?>
-<? if ($ord['tempOff'] == 1) {$ord['status'] = 7;}?>
+                                <? if ($ord['tempOff'] == 1) {$ord['status'] = 7;}?>
                             <tr class="
-			<? if ($ord['status'] == 0): ?>is_new<? elseif ($ord['status'] == 1 || $ord['status'] == 3 || $ord['status'] == 4 || $ord['status'] == 5): ?>is_yes
-			<? elseif ($ord['status'] == 7): ?>is_no
-			<? elseif ($ord['status'] == 2): ?>is_deny
-			<? elseif ($ord['status'] == 8): ?>is_accept
-			<? elseif ($ord['status'] == 9): ?>is_arrived
-			<? endif ?> ">
+                                <? if ($ord['status'] == 0): ?>is_new<? elseif ($ord['status'] == 1 || $ord['status'] == 3 || $ord['status'] == 4 || $ord['status'] == 5): ?>is_yes
+                                <? elseif ($ord['status'] == 7): ?>is_no
+                                <? elseif ($ord['status'] == 2): ?>is_deny
+                                <? elseif ($ord['status'] == 8): ?>is_accept
+                                <? elseif ($ord['status'] == 9): ?>is_arrived
+                                <? endif ?> ">
 
                                 <!--Редактир-->
                                 <td width="35">
