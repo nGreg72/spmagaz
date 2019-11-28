@@ -539,7 +539,7 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $anonim = intval($_POST['isAnonim']);
             $remains = intval($_POST['remains']);
 
-        if ( $remains - $kolvo >= 0 ) {
+        if ( $remains - $kolvo >= 0 OR $size < 1) {
             $query = "UPDATE `sp_order` SET
                       `message` = '$text',
                       `color` = '$color',

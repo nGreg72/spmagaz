@@ -42,7 +42,7 @@ $remains = $obg->get_remains($items[0]['id_ryad'])
                     "Webdings=webdings;" +
                     "Wingdings=wingdings,zapf dingbats",
                     fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt",
-                    plugins: "autolink autoresize smileys textcolor link image jbimages lists charmap pagebreak preview placeholder code",
+                    plugins: "autolink autoresize smileys textcolor link image jbimages lists charmap pagebreak preview code",
                     toolbar: "undo redo | forecolor backcolor smileys link image pagebreak |  | fontselect | fontsizeselect",
                     contextmenu: "link image insertable | cell row column deletable",
                     pagebreak_separator: "<!-- my page break -->",
@@ -62,6 +62,7 @@ $remains = $obg->get_remains($items[0]['id_ryad'])
                     <input type="hidden" name="action" value="editorder">
                     <input type="hidden" name="idd" value="<?= intval($_GET['value']); ?>">
                     <input type="hidden" name="remains" value="<?=$remains?>">
+                    <input type="hidden" name="row_size" value="<?=$items[0]['sizename']?>">
                     <table summary="" style="line-height: 1.8;">
                         <tr>
                             <td valign="top" width="100"><b>Название</b></td>
@@ -118,7 +119,11 @@ $remains = $obg->get_remains($items[0]['id_ryad'])
                             <td><input type="text" class="inputbox" style="width:200px;" name="kolvo"
                                        value="<?= $items[0]['kolvo']; ?>">
                                 <br/>
-                                <span style="background-color: #fdcdcd">Доступно для заказа : <b><?=$remains?></b> шт.</span>
+                                <span style="background-color: #fdcdcd">
+                                        <?if ($items[0]['sizename'] >= 1) :?>
+                                        Доступно для заказа :
+                                        <b><?=$remains?></b> шт.</span>
+                                    <?endif;?>
                             </td>
                         </tr>
                         <tr>
