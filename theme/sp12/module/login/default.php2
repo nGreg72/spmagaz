@@ -1,0 +1,46 @@
+<?defined('_JEXEC') or die('Restricted access');?>
+<?if ( !$user->is_loaded() ):?>
+	<div id="login">
+	 <form action="/" method="post" id="form-login">
+            <input id="modlgn_username" name="uname" class="inputbox wl2" size="20" alt="username"
+                   value="Логин" onMouseOver="if(this.value=='Логин')this.value='' " onMouseOut="if(this.value=='')this.value='Логин'" type="text"/>
+            <input id="modlgn_passwd" name="pwd" class="inputbox wl2" size="20" alt="password" value="........."
+                   onfocus="doClear(this)" onblur="if (this.value==''){this.value='******'}" type="password"/>
+            <input name="Submit" class="inputbox_signin" value="Вход" title="Вход в систему" type="submit"/>
+	    <a href="/forum/register.php" class="reg-a">Регистрация</a>
+	    <a href="/forum/login.php?action=forget" class="conf-a">Забыли пароль?</a>
+        </form>	
+
+<!-- Сраная логинза
+<script src="http://loginza.ru/js/widget.js" type="text/javascript"></script>
+<a href="http://loginza.ru/api/widget?token_url=<?=urlencode("http://{$_SERVER['HTTP_HOST']}/com/login/")?>"
+		class="conf-b"></a> -->
+
+	</div>
+
+<!--
+<div id="login-form">
+      <h1>АВТОРИЗАЦИЯ</h1>
+        <fieldset>
+            <form action="javascript:void(0);" method="get">
+                <input type="email" required value="Логин" onBlur="if(this.value=='')this.value='Логин'" onFocus="if(this.value=='Логин')this.value='' "> 
+                <input type="password" required value="Пароль" onBlur="if(this.value=='')this.value='Пароль'" onFocus="if(this.value=='Пароль')this.value='' "> 
+                <input type="submit" value="ВОЙТИ">
+            </form>
+        </fieldset>
+    </div> 
+
+  <!-- END BLOCK MENU-->
+<?else:
+if($user->get_property('display_name'))$username=$user->get_property('display_name'); else $username=$user->get_property('username');
+?>
+<div id="login">
+	<span id="hello">Вы зашли как: <span><?=$username?></span></span>
+	<?if($user->get_property('gid')==25):?>
+	<a href="/partner/index.php" class="adminlink">Администрирование</a>
+<!--	<a href="/" class="adminlink">Администрирование</a>					-->
+	<?endif;?>
+	<p align="right"><a href="/?logout=1" class="logout">Выход</a></p>
+</div>
+
+<?endif;?>
