@@ -7,7 +7,7 @@
     }
 } else {
 
-    $images = array();
+    $images = [];
     preg_match_all('/(img|src)=("|\')[^"\'>]+/i', $item_r['message'], $media);
     unset($data);
     $data = preg_replace('/(img|src)("|\'|="|=\')(.*)/i', "$3", $media[0]);
@@ -25,7 +25,7 @@
 
 }
 if (!$img_path) {
-    $filelist = array();
+    $filelist = [];
     $path = "fmanager/uploads/zakup/{$item_r['id_zp']}/ryad/{$item_r['id']}/";
     if ($handle = opendir($path)) {
         while ($entry = readdir($handle)) {
@@ -66,7 +66,7 @@ $quantity = $DB->getAll($sql);
     $ordered = $ordered + $qnt['kolvo'];
  endforeach;
 
-$compare = $ordered / $item_r['size'];
+$compare = ($ordered / ($item_r['size'] * $item_r['duble']));
 $remains = ($item_r['size'] * $item_r['duble']) - $ordered;                                                        /*выводим остаток товара в коробке на главную страницу*/
 ?>
 

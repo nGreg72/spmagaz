@@ -1,5 +1,8 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 
+<? include "lib/calculate_remains.php";
+?>
+
 <script src="/<?=$theme?>js/sweetalert2/dist/sweetalert2.min.js"></script>
 <link rel="stylesheet" type="text/css" href="/<?=$theme?>js/sweetalert2/dist/sweetalert2.css">
 <script type="text/javascript">
@@ -333,11 +336,25 @@ if(count($addpay[$zp['id']])==0):?>
 
                                         <!--К общеей сумме добавляем доплату и наценку-->
                                         <span style="font: bold 14px Arial;"
-                                              title="Итого к оплате">Итого к оплате</span>: <span class="price"
+                                              title="Итого к оплате">К оплате</span>: <span class="price"
                                                                                                   id="price<?= $zp['id']; ?>">
-	  <?= ceil(($totalzp[$zp['id']] * $zp['curs']) + round(($totalzp[$zp['id']] * $zp['curs']) / 100 * $zp['proc'], 2) + $userdost + $itap['doplata'] + $extraCharge); ?><?= $registry['valut_name'] ?>
-                                            <? if ($addpay[$zp['id']][0]['status'] == 1): ?><span class="green">(оплачено)</span><? endif ?>
-			</span><br/>
+	                                    <?= ceil(($totalzp[$zp['id']] * $zp['curs']) + round(($totalzp[$zp['id']] * $zp['curs']) / 100
+                                                * $zp['proc'], 2) + $userdost + $itap['doplata'] + $extraCharge); ?> <?= $registry['valut_name'] ?>
+
+                                        <?
+                                        $res = new calculate_remains();
+                                        $confirmed_order = $res->get_confirmed_orders($zp['id'], $zp['proc'], $ord['user']);
+                                        ?>
+
+                                        <?if ($ord['sizename'] > 1 ):?>
+                                        <br>
+                                        <span style="font: bold 14px Arial; color: green">Подтверждённые :</span> <?=$confirmed_order?> <?= $registry['valut_name'] ?>
+                                        <?endif;?>
+
+                                        <? if ($addpay[$zp['id']][0]['status'] == 1): ?>
+                                            <span class="green">(оплачено)</span><? endif ?>
+			                                </span><br/>
+
 <!--                                        --><?// if (($zp['status'] == 6 and ($zp['type'] == 0 or $zp['type'] == 2)) || ($_GET['status'] == 6 and $zp['type'] == 1)): ?>
                                         <?if ($zp['status'] == 6 OR $zp['status'] == 5 OR $zp['status'] == 8): ?>
                                             <b style="color:red; font: 24px arial;"> Реквизиты для оплаты </b>:
