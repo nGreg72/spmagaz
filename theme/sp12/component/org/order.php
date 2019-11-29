@@ -1,5 +1,11 @@
 <?defined('_JEXEC') or die('Restricted access');?>
 <?if ($user->get_property('userID')>0):?>
+
+<?include "lib/calculate_remains.php";
+    $obg = new calculate_remains();
+    $remains = $obg->get_remains($items[0]['id'])
+?>
+
 <?if(empty($message) and empty($oke)):?>
 
 <script 
@@ -75,7 +81,11 @@
 		<tr>
 			<td valign="top"><b>Количество</b></td>
 			<td><input type="text" class="inputbox" style="width:100px;" name="kolvo"  value="<?if(empty($items[0]['kolvo'])):?>1<?else:?><?=$items[0]['kolvo']?><?endif?>">
-			<br/>пример: 3
+			<br/> <span style="background-color: #fdcdcd">
+                    <?if ($items[0]['size'] >= 1) :?>
+                        Доступно для заказа :
+                        <b><?=$remains?></b> шт.</span>
+                    <?endif;?>
 			</td>
 		</tr>
 <!--		<tr>

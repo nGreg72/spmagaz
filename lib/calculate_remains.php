@@ -1,7 +1,5 @@
 <?php
 
-$DB=new DB_Engine('mysql', $settings['dbHost'], $settings['dbUser'], $settings['dbPass'], $settings['dbName']);
-
 class calculate_remains {
 
     /**
