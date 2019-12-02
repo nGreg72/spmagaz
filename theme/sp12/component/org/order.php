@@ -1,8 +1,8 @@
 <?defined('_JEXEC') or die('Restricted access');?>
 <?if ($user->get_property('userID')>0):?>
 
-<?include "lib/calculate_remains.php";
-    $obg = new calculate_remains();
+<?include "lib/db_requests.php";
+    $obg = new dbrequests();
     $remains = $obg->get_remains($items[0]['id'])
 ?>
 

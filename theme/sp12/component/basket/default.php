@@ -1,6 +1,6 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 
-<? include "lib/calculate_remains.php";
+<? include "lib/db_requests.php";
 ?>
 
 <script src="/<?=$theme?>js/sweetalert2/dist/sweetalert2.min.js"></script>
@@ -342,7 +342,7 @@ if(count($addpay[$zp['id']])==0):?>
                                                 * $zp['proc'], 2) + $userdost + $itap['doplata'] + $extraCharge); ?> <?= $registry['valut_name'] ?>
 
                                         <?
-                                        $res = new calculate_remains();
+                                        $res = new dbrequests();
                                         $confirmed_order = $res->get_confirmed_orders($zp['id'], $zp['proc'], $ord['user']);
                                         ?>
 

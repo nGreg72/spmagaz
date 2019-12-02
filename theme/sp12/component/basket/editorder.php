@@ -1,8 +1,8 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 
 <!--Вычисляем досупный остаток товара в рядах-->
-<? include "lib/calculate_remains.php";
-$obg = new calculate_remains();
+<? include "lib/db_requests.php";
+$obg = new dbrequests();
 $remains = $obg->get_remains($items[0]['id_ryad'])
 ;?>
 

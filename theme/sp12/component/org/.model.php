@@ -685,6 +685,7 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
 		JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
 		WHERE `sp_zakup`.`id`=" . intval($_GET['value']);
     $openzakup = $DB->getAll($sql);
+
     if ($_GET['section'] == 'move') {
         $idm = null;
         $move_sql = " and o.id = '$idm'";
@@ -711,14 +712,14 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
 			WHERE o.`id_zp` = '" . intval($_GET['value']) . "' $sqlus ORDER BY o.id DESC";
     $allorder = $DB->getAll($query);
     $items_total_all = 0;
-    $allsize = [];
+//    $allsize = [];
 
     foreach ($allorder as $aord) {
         $query = "SELECT * FROM `sp_ryad` WHERE `id` = " . $aord['id_ryad'];
         $allryad = $DB->getAll($query);
 
-        $query = "SELECT `sp_size`.`anonim`, `sp_size`.`name`,`sp_size`.`user`
-			  FROM `sp_size` 
+        $query = "SELECT name, user, duble, anonim   
+			  FROM sp_size 
 			  WHERE `sp_size`.`id` = " . $aord['id_order'];
         $allsize_tmp = $DB->getAll($query);
 
@@ -740,6 +741,8 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
         $allryad[16] = $aord['tempOff'];                                          // временное отключения ряда
         $allryad[17] = $aord['duble'];                                      //дублирование рядов. Т.е., количество рядов
         $allryad[18] = $allsize_tmp[0]['name'];                                       //количество позиций в ряде
+        $allryad['id_order'] = $aord['id_order'];
+        $allryad['current_row'] = $allsize_tmp[0]['duble'];
 
         $allsize[] = $allryad;
         $items_total_all = $items_total_all + ($allryad[0]['price'] * $aord['kolvo']);
@@ -829,36 +832,44 @@ if ($_GET['section'] == 'notification'){
         };
 }
 
+//todo Перенос заказов в другой выкуп
 if ($_GET['section'] == 'move') {
     if ($_POST['move']) {
         $id_zp = intval($_POST['id_zp']);
         $id_o = intval($_POST['id_o']);
-        $query = "SELECT o.*
-			FROM `sp_order` AS o
-			WHERE o.`id` = '$id_o'";
+        $query = "SELECT o.* FROM `sp_order` AS o WHERE o.`id` = '$id_o'";
         $order = $DB->getAll($query);
+
         $query = "CREATE TEMPORARY TABLE foo AS SELECT * FROM sp_ryad WHERE id = '{$order[0]['id_ryad']}';";
         $DB->execute($query);
+
         $query = "UPDATE foo SET `id` = NULL,`id_zp`='$id_zp', `auto`='0', `spec`='0', `position`='0';";
         $DB->execute($query);
+
         $query = "INSERT INTO sp_ryad SELECT * FROM foo;";
         $DB->execute($query);
+
         $newid = $DB->id;
         $query = "DROP TABLE foo";
         $DB->execute($query);
+
         $query = "CREATE TEMPORARY TABLE foo2 AS SELECT * FROM sp_size WHERE id_ryad = '{$order[0]['id_ryad']}' 
-			and duble='{$order[0]['duble']}' and user = ''{$order[0]['user']};";
+			      and duble='{$order[0]['duble']}' and user = ''{$order[0]['user']};";
         $DB->execute($query);
+
         $query = "UPDATE foo2 SET id=NULL, duble=1, id_ryad=$newid;";
         $DB->execute($query);
+
         $query = "INSERT INTO sp_size SELECT * FROM foo2;";
         $DB->execute($query);
+
         $query = "DROP TABLE foo2";
         $DB->execute($query);
+
         $query = "UPDATE `sp_order` SET
-			`id_zp` = '$id_zp', `id_ryad` = '$newid'
-			 WHERE `sp_order`.`id` = '$id_o' LIMIT 1 ;";
+			`id_zp` = '$id_zp', `id_ryad` = '$newid' WHERE `sp_order`.`id` = '$id_o' LIMIT 1 ;";
         $DB->execute($query);
+
 //		$query = "UPDATE `office_set` SET
 //			`zp_id` = '$id_zp'
 //			 WHERE `office_set`.`user` = '' and `office_set`.`zp_id` = '' LIMIT 1 ;";
@@ -1342,12 +1353,12 @@ if ($user->get_property('userID') > 0):
                 $pmessage = null;
                 $pmessage_edit = null;
                 $query = "UPDATE sp_order SET `message` = '$pmessage', `mess_edit` = '$pmessage_edit',
-			`color` = '$color', `kolvo` = '$kolvo' WHERE `sp_order`.`id` =$idpost LIMIT 1 ;";
-                $db->setQuery($query);
-                $db->query();
+			              `color` = '$color', `kolvo` = '$kolvo' WHERE `sp_order`.`id` =$idpost LIMIT 1 ;";
+                $DB->setQuery($query);
+                $DB->query();
                 $query = "UPDATE sp_size SET `anonim` = '$anonim' WHERE `sp_size`.`id` =" . $items[0]->id_order . " LIMIT 1 ;";
-                $db->setQuery($query);
-                $db->query();
+                $DB->setQuery($query);
+                $DB->query();
 
             }
         } // if err==0

@@ -1,5 +1,7 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 
+<?include "lib/db_requests.php"?>
+
 <? if (count($openzakup) > 0):
     $openzakup[0]['russia'] = unserialize($openzakup[0]['russia']); ?>
     <div class="menu-top5"><?= $openzakup[0]['title'] . ' - ' . $openzakup[0]['city_name_ru']; ?></div>
@@ -350,12 +352,11 @@
                 <? for ($count_duble = 1; $count_duble <= $item_r['duble']; $count_duble++):?>
                 <?
                 $query = "SELECT `sp_size`.*,
-				IF(punbb_users.display_name != '', punbb_users.display_name, punbb_users.username) AS username
-
-			  FROM `sp_size` 
-			  LEFT JOIN `punbb_users` ON `sp_size`.`user`=`punbb_users`.`id`
-			  WHERE `id_ryad` = " . $item_r['id'] . " AND `duble`=$count_duble 
-			  ORDER BY LENGTH(`sp_size`.`name`), CONVERT( `sp_size`.`name` , CHAR )";
+                      IF(punbb_users.display_name != '', punbb_users.display_name, punbb_users.username) AS username 
+                      FROM `sp_size` 
+                      LEFT JOIN `punbb_users` ON `sp_size`.`user`=`punbb_users`.`id`
+                      WHERE `id_ryad` = " . $item_r['id'] . " AND `duble`=$count_duble 
+                      ORDER BY LENGTH(`sp_size`.`name`), CONVERT( `sp_size`.`name` , CHAR )";
                 $items_size = $DB->getAll($query); ?>
 
                 <? $a = 0;
@@ -410,9 +411,24 @@
                                if ($item_s['anonim'] == 0):
                                    for ($ic = 0; $ic < $kolvo; $ic++): if ($kolvo > 1)?>
                                         <td>
-                                            <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
+                                            <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>       <!--todo Сделать подсветку подтверждённых заказов-->
                                             <!--<a class="link4"><? /*=$item_s['username']*/ ?></a>-->
                                             <a class="link4" title="<?= $item_s['username'] ?>"><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
+
+                                       <br>
+                                        <?
+                                        echo $item_s['user'];
+                                        echo "<br>";
+                                        echo $item_s['id'];
+
+                                        $temp = new dbrequests();
+                                        $complite = $temp->is_row_complite($item_s['id_ryad']);
+                                        echo "<br>";
+//                                        echo $complite;
+                                       ?>
+
+
+
                                             <!--Имя пользователя в квадратике заказа-->
                                             <!--    <a href="/com/profile/default/<?= $item_s['user'] ?>" class="link4"><?= $item_s['username'] ?></a> -->
                                             <!--Заказавшие пользователи с ссылками на профиль-->
@@ -433,6 +449,16 @@
                             endif;
                         endforeach;?>
                     </tr>
+
+
+                    <br>
+                    sp_size.duble = <?=$item_s['duble']?>
+                    <br>
+                    sp_size.name = <?=$item_s['name']?>
+
+
+
+
                     </tbody>
                 </table>
                                     <? endfor; ?>

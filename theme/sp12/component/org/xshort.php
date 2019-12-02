@@ -78,7 +78,7 @@ $remains = ($item_r['size'] * $item_r['duble']) - $ordered;                     
                 <? if (is_int($compare)): ?>
                     <div style="width: 231px; height: 5px; background-color: #ec7c7f;"></div>    <!-- todo если число целое - коробка собрана. Можно добавить цифры, количетсво собранных шоколадок ($ordered)-->
                 <? else: ?>
-                    <div style="width: 231px; height: 5px; background-color: #63dd51;"></div>
+                    <div style="width: 231px; height: 5px; background-color: #63dd51;"></div><?=$item_r['duble']?>
                 <? endif; ?>
             <? } ?>
         </div>

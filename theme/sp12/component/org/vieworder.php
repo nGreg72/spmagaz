@@ -1,6 +1,8 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 <? if ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID')): ?>
 
+<?include "lib/db_requests.php"?>
+
     <style>
         #user-name {
             color: #0C6FBB;
@@ -80,14 +82,20 @@
             <? if (floatval($openzakup[0]['curs']) == 0) $openzakup[0]['curs'] = 1; ?>
             <? $totaldost = 0;
             $summExtraCharge = 0;                                                                      // Объявляем переменную общей наценки
-            foreach ($allsize as $itm):?>
-                <?
+            foreach ($allsize as $itm):
+
                 $timee = explode(':', $itm[1]);
                 $datee = explode('.', $timee[0]);
                 $datee = $datee[2] . '/' . $datee[1];
                 $timee = explode('.', $timee[1]);
                 $timee = $timee[0] . ' ч, ' . $timee[1] . ' мин.';
-                if ($itm[3] == 0 OR $user->get_property('gid') == 25 OR $itm[4] == $user->get_property('userID') or $openzakup[0]['user'] == $user->get_property('userID'))
+
+//  row completion request ------------------------------------------------------------------------------------------
+                $temp = new dbrequests();
+                $mark = $temp->is_row_complite($itm[0]['id'], $itm['current_row']);
+//  row completion request-------------------------------------------------------------------------------------------
+
+               if ($itm[3] == 0 OR $user->get_property('gid') == 25 OR $itm[4] == $user->get_property('userID') or $openzakup[0]['user'] == $user->get_property('userID'))
                     $linku = '<a href="/com/profile/default/' . $itm[4] . '" id="user-name">' . $itm[5] . '</a>'; else $linku = 'Аноним';
                 ?>
                 <tr id="item<?= $itm[10] ?>"
@@ -122,26 +130,19 @@
                         <? if (!empty($itm[12])):?><br/><b>ЦР:</b> <?= $itm[12] ?><? endif; ?><br/>
                     </td>
                     <td class="td1">
-                        <u><?= $itm[0]['title'] ?></u><br/>
+                        <a href="/com/org/ryad/<?= $itm[0]['id_zp']; ?>/<?= $itm[0]['id']; ?>">
+                        <span <?if ($mark):?> style="background-color: khaki;" ><?endif;?>
+                            <u><?= $itm[0]['title'] ?></u>
+                        </span>
+                        </a>
+                        <br/>
+
                         <? if (!empty($itm[0]['articul'])):?><b>Артикул:</b> <?= $itm[0]['articul'] ?><br/><? endif; ?>
                         <? if (!empty($itm[7])):?><b>Размер:</b> <?= $itm[7] ?><br/><? endif; ?>
                         <? if (!empty($itm[8])):?><b>Цвет:</b> <?= $itm[8] ?><br/><? endif; ?>
                         <? if (!empty($itm[11]) && ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID'))):?>
                             <b>Доп.инфо:</b> <i><?= htmlspecialchars_decode($itm[6]) ?></i>
                         <? endif; ?>
-
-<!--temp area -----------------------------------------------------------------------------------------------------  -->
-                        sp_ryad.duble = <?=$itm[17]?>
-                        <br>
-                        sp_size.name = <?=$itm[18]?>
-                        <br>
-                        sp_ryad.kolvo = <?=$itm[2]?>
-                        <br>
-                        sp_order.id = <?= $itm[10]; ?>
-                        <br>
-                        sp_order.status = <?= $itm[9]; ?>
-
-<!--temp area -----------------------------------------------------------------------------------------------------  -->
                     </td>
                     <td class="td1"><?= $itm[2] ?> шт.</td>
 
@@ -212,7 +213,6 @@
                                 <div style="padding-top: 9px;"><a href="/com/org/delrz/<?= $itm[10]; ?>/" style="color:red;"
                                                                   onclick="return confirm_delete_ryad(this)">Удалить заказ</a></div>
                             </div>
-
                         </form>
                     </td>
                 </tr>

@@ -1,12 +1,12 @@
 <?php
 
-class calculate_remains {
+class dbrequests {
 
     /**
      * @param $id_ryad
      * @return int
      * Вычисляем доступный остаток товара в рядах. С учётом количества рядов.
-     * На основании этих данных, можно принимать решение, выкупать ряд или нет.
+     * На страницах оформления заказа и редактирования (в корзине пользователя) выводим разрешённый доступный остаток
      */
     public function get_remains($id_ryad){
 
@@ -54,4 +54,34 @@ class calculate_remains {
 
         return ceil($confirmed_order);
     }
+
+    /**
+     * @param $id_ryad
+     * @param $id_user
+     * @return mixed
+     */
+    public function is_row_complite($id_ryad, $current_row){
+
+        global  $DB;
+
+        $sql = "SELECT id, name FROM sp_size WHERE id_ryad = $id_ryad and duble = $current_row";
+        $sp_size_ids = $DB->getAll($sql);
+
+        $row_lenght = $sp_size_ids[0]['name'];
+
+        $summ = 0;
+            foreach ($sp_size_ids as $sp_size_id){
+                $id = $sp_size_id['id'];
+                $sql = "SELECT kolvo FROM sp_order WHERE id_order = $id";
+                $current_qnt_orders = $DB->getOne($sql);
+                $summ = $summ + $current_qnt_orders[0]['kolvo'];
+            }
+
+        if ($row_lenght == $summ){
+            $is_current_row_closed = 1;
+        }
+
+    return $is_current_row_closed;
+    }
+
 }
