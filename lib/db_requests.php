@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Class dbrequests
+ * Разные запросы на чтение в базу данных
+ */
+
 class dbrequests {
 
     /**
@@ -59,6 +64,7 @@ class dbrequests {
      * @param $id_ryad
      * @param $id_user
      * @return mixed
+     * Маркировка заказов, которые входят в полностью заполненные ряды на странице vieworder
      */
     public function is_row_complite($id_ryad, $current_row){
 
@@ -74,7 +80,8 @@ class dbrequests {
                 $id = $sp_size_id['id'];
                 $sql = "SELECT kolvo FROM sp_order WHERE id_order = $id";
                 $current_qnt_orders = $DB->getOne($sql);
-                $summ = $summ + $current_qnt_orders[0]['kolvo'];
+
+                $summ = $summ + $current_qnt_orders;
             }
 
         if ($row_lenght == $summ){
@@ -82,6 +89,32 @@ class dbrequests {
         }
 
     return $is_current_row_closed;
+    }
+
+    /**
+     * @param $order_id
+     * @return int
+     * Подкрашиваем квадратики заказов со статусом "Включено в счёт" на странице org/ryad
+     */
+    public function colorize_order($order_id){
+
+        global $DB;
+
+        $sql = "SELECT status FROM sp_order WHERE id_order = $order_id and status = 1";
+        $response = $DB->getOne($sql);
+
+        return $response;
+    }
+
+    function move_orders_to_new_row($id_zp, $order_id){
+
+        global $DB;
+
+        $sql = "SELECT id, title FROM sp_ryad WHERE id_zp = $id_zp ORDER BY id";
+        $response = $DB->getAll($sql);
+
+        return $response;
+
     }
 
 }

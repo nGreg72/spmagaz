@@ -878,6 +878,64 @@ if ($_GET['section'] == 'move') {
 
     }
 }
+
+//todo Перенос заказов в другой ряд
+if ($_GET['section'] == 'ryad') {
+    if ($_POST['move_orders']) {
+        $id_zp = intval($_GET['value']);
+        $old_row_id = intval($_POST['from']);
+        $new_row_id = intval($_POST['to']);
+
+        $query = "SELECT id_order, price, duble FROM sp_order 
+                LEFT JOIN sp_ryad ON sp_ryad.id = $old_row_id
+                WHERE id_ryad = $old_row_id";
+        $id_order = $DB->getAll($query);
+
+//  Вытаскиваем цену товара и количество рядов того ряда, КОТОРЫЙ переезжает
+        $source_price = $id_order[0]['price'];
+        $source_num_row = $id_order[0]['duble'];
+
+//  Вытаскиваем цену и количество рядов в целевом ряде
+        $sql = "SELECT duble, price FROM sp_ryad WHERE id = $new_row_id";
+        $temp = $DB->getAll($sql);
+
+        $target_price = $temp[0]['price'];
+        $target_num_row = intval($temp[0]['duble']);
+
+//  Считаем новое значение количества рядов (sp_ryad.duble) в целевом ряде
+        $summ = $source_num_row + $target_num_row;
+
+//  Обновляем значение sp_ryad.duble
+        $sql = "UPDATE sp_ryad SET duble = $summ WHERE id = $new_row_id";
+        $DB->execute($sql);
+
+//  Меняем номер ряда в заказах
+        foreach ($id_order as $id){
+            $id_ord = $id['id_order'];
+            $sql = "UPDATE sp_order SET 
+                    sp_order.id_ryad = $new_row_id WHERE id_order = $id_ord  ";
+            $DB->execute($sql);
+        }
+
+        $query2 = "SELECT id, duble FROM sp_size WHERE id_ryad = $old_row_id";
+        $id_size = $DB->getAll($query2);
+
+//        Обновляем таблицу sp_size. Устанавливаем номер нового ряда и меняем duble с учётом рядов, которые уже были
+//        в целевом ряде. Т.е., сдвигаем положение перемещаемых заказов.
+        foreach ($id_size as $id){
+            $id_s = $id['id'];
+            $id_d = $id['duble'] + $target_num_row;
+            $sql2 = "UPDATE sp_size SET 
+                      id_ryad = $new_row_id,
+                      duble = $id_d 
+                     WHERE id = $id_s";
+            $DB->execute($sql2);
+        }
+
+        $message = 'Низкий поклон <a href="/com/org/open/' . $id_zp . '/" class="link4">закупку</a>.';
+    }
+}
+
 // далее фанкции закрытого доступа -----------------------------------------------------------------------------
 if ($user->get_property('userID') > 0):
     if ($_GET['section'] == 'multi') {
@@ -2883,7 +2941,8 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
     $type = intval($_GET['value2']);
     $userData = [];
 	
-    if ($type == 1) $order = " and o.status>=0 and o.status!=7 and o.status!=2 and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику
+//    if ($type == 1) $order = " and o.status>=0 and o.status!=7 and o.status!=2 and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику
+    if ($type == 1) $order = " and (o.status=8 or o.status=1) and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику, только заказы со статусом "в обработке"
     if ($type == 2) $order = "and (o.status =1 or o.status=9) ORDER BY uo.username ASC"; //o.date сорт по заказам - r.title, сорт по пользователям - uo.username
     if ($type == 3) $order = "and (o.status =1 or o.status=9)";
     if ($type == 4) $order = "ORDER BY uo.username DESC";
@@ -3058,4 +3117,5 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
     endif;
     exit;
 }
+
 

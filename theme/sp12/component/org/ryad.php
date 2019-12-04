@@ -1,6 +1,6 @@
 <? defined('_JEXEC') or die('Restricted access'); ?>
 
-<?include "lib/db_requests.php"?>
+<?include "lib/db_requests.php"; ?>
 
 <? if (count($openzakup) > 0):
     $openzakup[0]['russia'] = unserialize($openzakup[0]['russia']); ?>
@@ -404,31 +404,24 @@
                                     <td><span title="Вы в черном списке и не можете делать заказ!">X</span>
                                     </td>
                                   <? endif;
-
                                   else:
                                      $sql = "SELECT kolvo FROM `sp_order` WHERE `id_order` = '{$item_s['id']}' LIMIT 1";
-                                    $kolvo = $DB->getOne($sql);
+                                            $kolvo = $DB->getOne($sql);
+
+//---- Подсветка заказов в статусе "Включено в счёт" -------------------------------------------------------------------
+                                  $temp = new dbrequests();
+                                  $mark = $temp->colorize_order($item_s['id']);
+
                                if ($item_s['anonim'] == 0):
                                    for ($ic = 0; $ic < $kolvo; $ic++): if ($kolvo > 1)?>
-                                        <td>
-                                            <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>       <!--todo Сделать подсветку подтверждённых заказов-->
+                                        <td
+                                           <?if ($mark):?>
+                                           style="background-color: #d5f9d5"
+                                           <?endif;?> >
+                                            <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
                                             <!--<a class="link4"><? /*=$item_s['username']*/ ?></a>-->
-                                            <a class="link4" title="<?= $item_s['username'] ?>"><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
-
+                                            <a class="link4" title="<?= $item_s['username']?>" ><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
                                        <br>
-                                        <?
-                                        echo $item_s['user'];
-                                        echo "<br>";
-                                        echo $item_s['id'];
-
-                                        $temp = new dbrequests();
-                                        $complite = $temp->is_row_complite($item_s['id_ryad']);
-                                        echo "<br>";
-//                                        echo $complite;
-                                       ?>
-
-
-
                                             <!--Имя пользователя в квадратике заказа-->
                                             <!--    <a href="/com/profile/default/<?= $item_s['user'] ?>" class="link4"><?= $item_s['username'] ?></a> -->
                                             <!--Заказавшие пользователи с ссылками на профиль-->
@@ -482,6 +475,29 @@
                     </a>
                     - <a class="news_body_a4" href="/com/org/delr/<?= $item_r['id']; ?>/<?= intval($_GET['value']); ?>"
                          onclick="if (!confirm('Вы подтверждаете удаление ряда?  --  <?= $item_r['title'] ?>)')) return false;">удалить</a>
+
+                    <?$temp = new dbrequests();
+                    $move_orders_to_new_row = $temp->move_orders_to_new_row($item_r['id_zp'], $item_s['id']);?>
+
+                    <br> <br> <br>
+
+                <form name="" method="post" action="">
+                    <input type="hidden" name="move_orders" value="1">
+                    <input type="hidden" name="from" value="<?=$item_r['id']?>">
+
+                    <select name="to" id="new_order">
+                        <option>Куда переместить?</option>
+                        <?foreach ($move_orders_to_new_row AS $tmp):?>
+                            <option value="<?=$tmp['id']?>"><?=$tmp['title']?></option>
+                        <?endforeach;?>
+                    </select>
+
+                    <input type="submit" value="Перенести">
+                </form>
+
+
+
+
                 </p>
 
                 <a class="ribbon1" href="/com/org/double/<?= $item_r['id']; ?>/<?= intval($_GET['value']); ?>"></a>
