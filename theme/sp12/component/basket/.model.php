@@ -67,7 +67,7 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
                 WHERE  $basketStatus AND `sp_order`.`user` = '{$user->get_property('userID')}'
                 GROUP BY `sp_zakup`.`id`
                 ORDER BY `sp_zakup`.`id` DESC";
-                $zakup = $DB->getAll($sql);
+        $zakup = $DB->getAll($sql);
 
         foreach ($zakup as $zp):
             if ($zp['type'] == 1 and $_GET['status'] > 0) {
@@ -80,7 +80,7 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
                         JOIN `sp_size` ON `sp_order`.`id_order`=`sp_size`.`id`
                         JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_size`.`id_ryad`
                         where `sp_order`.`id_zp`='" . $zp['id'] . "' and `sp_order`.`user`='{$user->get_property('userID')}' ";
-                        $order[$zp['id']] = $DB->getAll($sql);
+            $order[$zp['id']] = $DB->getAll($sql);
 
             $totalprice = 0;
             if (count($order[$zp['id']]) > 0) {
@@ -470,17 +470,35 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
     if ($_GET['section'] == 'delorder') {
         // скрипт удаления товара из корзины
         $delorder = intval($_GET['value']);
-        $query = "SELECT `sp_order`.*, `punbb_users`.`email`,`sp_zakup`.`title`,`sp_zakup`.`alertnews`
-		  FROM `sp_order` 
-		  LEFT JOIN `sp_zakup` ON `sp_order`.`id_zp`=`sp_zakup`.`id`
-		  JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
-		  WHERE `sp_order`.`id` = '" . $delorder . "' and `sp_order`.`user`='" . $user->get_property('userID') . "'";
+        $query = "SELECT `sp_order`.*, `punbb_users`.`email`,`punbb_users`.`username`,`sp_zakup`.`title`,`sp_zakup`.`alertnews`, sp_ryad.title as ryad_name
+		            FROM `sp_order` 
+		            LEFT JOIN `sp_zakup` ON `sp_order`.`id_zp`=`sp_zakup`.`id`
+		            LEFT JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_order`.`id_ryad`
+		            JOIN `punbb_users` ON `sp_order`.`user`=`punbb_users`.`id`
+		            WHERE `sp_order`.`id` = '" . $delorder . "' and `sp_order`.`user`='" . $user->get_property('userID') . "'";
         $order = $DB->getAll($query);
+
         if (count($order) > 0) {
+
+            $del_user = $order[0]['user'];
+            $del_username = $order[0]['username'];
+            $del_zp_id = $order[0]['id_zp'];
+            $del_zp_name = $order[0]['title'];
+            $del_id_ryad = $order[0]['id_ryad'];
+            $del_ryad_name = $order[0]['ryad_name'];
+            $date = date('d M Y : H.i');
+            $quantity = $order[0]['kolvo'];
+
+            $sql = "INSERT INTO sp_deleters (`user`, `username`, `zp_id`, `zp_name`, `id_ryad`, `ryad_name`, `date`, `quantity`)
+                    VALUES ('$del_user', '$del_username', '$del_zp_id', '$del_zp_name', '$del_id_ryad', '$del_ryad_name', '$date', '$quantity')";
+            $DB->execute($sql);
+
             $query = "DELETE FROM `sp_order` WHERE `id` = " . $delorder;
             $DB->execute($query);
-            $query = "UPDATE sp_size SET `user`='0' WHERE id = " . $order[0]['id_order'];
+
+            $query = "DELETE FROM sp_size WHERE id = " . $order[0]['id_order'];
             $DB->execute($query);
+
             if ($order[0]['alertnews'] == 1) {
                 $emailsup = $DB->getOne('SELECT `setting`.`value` 
 			FROM `setting`
@@ -539,28 +557,27 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $anonim = intval($_POST['isAnonim']);
             $remains = intval($_POST['remains']);
 
-        if ( $remains - $kolvo >= 0 OR $size < 1) {
-            $query = "UPDATE `sp_order` SET
+            if ($remains - $kolvo >= 0 OR $size < 1) {
+                $query = "UPDATE `sp_order` SET
                       `message` = '$text',
                       `color` = '$color',
                       `kolvo` = '$kolvo'
                       WHERE `sp_order`.`id` ='$idd' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
-            $DB->execute($query);
-            $query = "UPDATE `sp_size` SET
+                $DB->execute($query);
+                $query = "UPDATE `sp_size` SET
 			          `anonim` = '$anonim',
 			          `name` = '$size'
 			          WHERE `sp_size`.`id` ='" . $items[0]['idsize'] . "' and `user`= '" . $user->get_property('userID') . "' LIMIT 1 ;";
-            $DB->execute($query);
-            $query = "UPDATE `sp_ryad` SET
+                $DB->execute($query);
+                $query = "UPDATE `sp_ryad` SET
                       `price` = '$price',
                       `title` = '$title',
                       `articul` = '$articul'
                       WHERE `sp_ryad`.`id` ='" . $items[0]['id_ryad'] . "';";
-            $DB->execute($query);
-        }
-        else {
-            echo $message = "Вы пытаетесь заказать больше, чем есть в коробке! Свяжитесь с организатором!";
-        }
+                $DB->execute($query);
+            } else {
+                echo $message = "Вы пытаетесь заказать больше, чем есть в коробке! Свяжитесь с организатором!";
+            }
 
             $oke = 1;
         }

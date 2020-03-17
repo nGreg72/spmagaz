@@ -35,6 +35,7 @@
                     <div ><a href="/index.php?component=article"><img src="/img/article.png" style="width: 60px; height: 60px;"/><br>Опубликовать новость</a></div>
 <!--                    <div ><a href="../../../../cgi-bin/Hello.py"><img src="/img/article.png" style="width: 60px; height: 60px;"/><br>Python test</a></div>-->
                     <div ><a href="/partner/theme/component/python/Hello.py"><img src="/img/article.png" style="width: 60px; height: 60px;"/><br>Python test</a></div>
+                    <div ><a href="<?= $_SERVER['PHP_SELF'] ?>?component=deleters"><img src="/img/article.png" style="width: 60px; height: 60px;"/><br>Deleters</a></div>
         </div>
                 <? endif; ?>
 <? endif ?>

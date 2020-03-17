@@ -1,4 +1,5 @@
 <? defined('_JEXEC') or die('Restricted access');
+
 if ($user->userData['group_id'] == 1 and (!empty($_POST['add']) or !empty($_POST['edit']))) {
     $text = PHP_slashes($_POST['textarea1']);
     $title = PHP_slashes(htmlspecialchars(strip_tags($_POST['title'])));
@@ -7,7 +8,8 @@ if ($user->userData['group_id'] == 1 and (!empty($_POST['add']) or !empty($_POST
     $size = PHP_slashes(htmlspecialchars(strip_tags($_POST['size'])));
     $quantity = PHP_slashes(htmlspecialchars(strip_tags($_POST['quantity'])));
     $cause = PHP_slashes(htmlspecialchars(strip_tags($_POST['cause'])));
-    $phoho = intval($_POST['photo']);
+//    $photo = intval($_FILES['photo']['name']);
+    $photo = $_FILES['photo']['name'];
     $buy = $_POST['buy'];
 //    if($cat==0) $message_cat='<- Вы укажите ка категорию.';
     if (empty($cause)) $message_cause = '<- Укажите причину.';
@@ -15,27 +17,28 @@ if ($user->userData['group_id'] == 1 and (!empty($_POST['add']) or !empty($_POST
     if (empty($price)) $message_price = '<- Укажите цену.';
     if (empty($message_cat) AND empty($message_price) AND empty($message_title) AND empty($message_cause)) {
         if (!empty($_POST['add']))
-            if (empty($quantity)){$quantity = 1;}
+            if (empty($quantity)) {
+                $quantity = 1;
+            }
 
-        if ($_FILES['photo']['size'] > 0)
-        {
+        if ($_FILES['photo']['size'] > 0) {
 //            $fileName = explode('.', $_FILES['photo']['name']);
 
             $firstName = $_POST['title'];
-            $imgpath_r = save_image_on_server($_FILES['photo'], 'img/uploads/zakup/', $setimg1, 'pristroy-' . $firstName, 'this');
+            $imgpath_r = save_image_on_server($_FILES['photo'], 'img/uploads/pristroy/', $setimg1, $firstName, 'this');
             $photo = $imgpath_r[1];
 //            $photo = strval($_POST['title']. '.' .$fileName[1]);
 
-/*            if (!empty($imgpath_r[1]))
-            {
-                $sql = "UPDATE `sp_pristroy` SET
-					`photo` = '" . $imgpath_r[1] . "'
-					WHERE `sp_ryad`.`id` = " . $lid;
-                $DB->execute($sql);
-            }*/
+            /*            if (!empty($imgpath_r[1]))
+                        {
+                            $sql = "UPDATE `sp_pristroy` SET
+                                `photo` = '" . $imgpath_r[1] . "'
+                                WHERE `sp_ryad`.`id` = " . $lid;
+                            $DB->execute($sql);
+                        }*/
         }
 
-            $sql = "INSERT INTO `sp_pristroy` (`user`,`title`,`text`,`cat`,`date`,`price`,`size`,`quantity`,`cause`, `photo`)
+        $sql = "INSERT INTO `sp_pristroy` (`user`,`title`,`text`,`off`,`date`,`price`,`size`,`quantity`,`cause`, `photo`)
 			        VALUE ('" . $user->get_property('userID') . "','$title','$text', 0,'" . time() . "','$price','$size','$quantity','$cause', '$photo')";
 
         if ($user->get_property('gid') != 25) $us = "and `sp_pristroy`.`user`='" . $user->get_property('userID') . "'"; else $us = '';
@@ -50,7 +53,7 @@ if ($user->userData['group_id'] == 1 and (!empty($_POST['add']) or !empty($_POST
                     `photo` = '$photo'
                      WHERE `sp_pristroy`.`id` ='" . intval($_POST['edit']) . "' $us	 LIMIT 1 ;";
         $DB->execute($sql);
-}
+    }
     header('location: /com/pristroy/');
 }
 
@@ -81,13 +84,13 @@ if (empty($_GET['section']) or $_GET['section'] == 'default') {
             $catselect = 'WHERE (';
             $i = 0;
             foreach ($allpodcats as $ac):$i++;
-                $catselect .= "`sp_pristroy`.`cat`='" . $ac['id'] . "'";
+                $catselect .= "`sp_pristroy`.`off`='" . $ac['id'] . "'";
                 if ($i < count($allpodcats)) $catselect .= ' OR ';
             endforeach;
             $catselect .= ')';
             $sort_catz_scroll = $testcats[0]['id'];
         } else {
-            $catselect = "WHERE `sp_pristroy`.`cat`='" . intval($sort_catz) . "'";
+            $catselect = "WHERE `sp_pristroy`.`off`='" . intval($sort_catz) . "'";
             $sort_catz_scroll = $testcats[0]['podcat'];
         }
     }*/

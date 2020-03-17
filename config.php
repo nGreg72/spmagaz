@@ -78,11 +78,11 @@ error_reporting(0);
 	$setimg1['max_image_height']	= 4092;
 	$setimg1['maxkbsize']		= 8000;
 	$setimg1['max_image_size']      = $setimg1['maxkbsize'] * 1024;
-	$setimg1['valid_types']		= array("gif", "GIF", "jpg", "JPG", "png", "PNG", "jpeg", "JPEG");
+	$setimg1['valid_types']		= ["gif", "GIF", "jpg", "JPG", "png", "PNG", "jpeg", "JPEG"];
 
 	$setfile['maxkbsize']		= 30000;
 	$setfile['max_image_size']      = $setimg1['maxkbsize'] * 1024;
-	$setfile['valid_types']		= array('doc','docx','rar','zip','csv','xls','xlsx');
+	$setfile['valid_types']		= ['doc','docx','rar','zip','csv','xls','xlsx'];
 
 	$registry['valut_name']	= 'руб.'; // минималка валюта
 	$registry['qnt_name']	= 'штук.'; // минималка количество

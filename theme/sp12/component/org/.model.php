@@ -7,16 +7,13 @@ $_POST['price'] = strval(str_replace(" ", "", $_POST['price'])); //убирае�
  */
 function str_without_accents($str, $charset = 'utf-8')
 {
-    $str = htmlentities($str,
-        ENT_NOQUOTES,
-        $charset);
+    $str = htmlentities($str, ENT_NOQUOTES, $charset);
     $str = preg_replace('#&([A-za-z])(?:acute|cedil|caron|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
     $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str); // pour les ligatures e.g. '&oelig;'
     $str = preg_replace('#&[^;]+;#', '', $str); // supprime les autres caractères
     return $str;   // or add this : mb_strtoupper($str); for uppercase :)
 }
 
-$registry = null;
 if ($_GET['section'] == 'ajax' and $_POST['key'] == $registry['license']) {
     if ($_POST['event'] == 'savecomm') {
         $id = intval($_POST['id']);
@@ -203,7 +200,7 @@ if ($_GET['section'] == 'ajax' and $_POST['key'] == $registry['license']) {
 
         $sql = "SELECT sp_addpay.transpStatus FROM sp_addpay WHERE id = $rel";
         $result = $DB->getOne($sql);
-        $payForDeliveryResult = json_encode([$result, $rel]);
+        $payForDeliveryResult = json_encode(array($result, $rel));
         echo $payForDeliveryResult;
     }
 
@@ -305,7 +302,7 @@ if (!empty($_POST['add-comm'])) {
                 <p>К вашему ряду оставлен новый комментарий.</p>
                 Для просмотра комментария или ответа перейдите по ссылке:<br/>
                 <a href=\"http://" . $_SERVER['HTTP_HOST'] . "/com/org/ryad/" . $checkemail[0]['id'] . "/" . $_GET["value2"] . "\">http://" . $_SERVER['HTTP_HOST'] . "/com/org/ryad/" . $checkemail[0]['id'] . "/" . $_GET["value2"] . "</a><br/>
-                <p>Вы в любое время можете отключить уведомления о новых комментариях в настройках вашей закупки</p>";
+                <p>Вы в любое время можете <b>отключить</b> уведомления о новых <b>комментариях</b> в настройках вашей закупки</p>";
         } else {
             $sb = "Новый комментарий к закупке \"" . $checkemail[0]['title'] . "\" на сайте " . $_SERVER['HTTP_HOST'];
             $bt = "
@@ -350,15 +347,16 @@ if ($_GET['section'] == 'exportr') {
                 JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
                 WHERE $onlystatus `sp_zakup`.`id`=" . intval($_GET['value']);
     $openzakup = $DB->getAll($sql);
-
     if ($_GET['togo'] == '1' and $user->get_property('gid') >= 23 and intval($_GET['value']) > 0) {
         $id = intval($_GET['value']);
         if ($user->get_property('gid') != 25) $onlystatus = "and r.user='{$user->get_property('userID')}'";
-        $sql = "SELECT r.* FROM sp_ryad r WHERE r.id_zp='$id' $onlystatus
-		        ORDER BY position ASC ";
+        $sql = "SELECT r.*
+		FROM sp_ryad r
+		WHERE r.id_zp='$id' $onlystatus
+		ORDER BY position ASC
+		";
         $allryad = $DB->getAll($sql);
-
-        $ar = ['À' => 'A', 'à' => 'a', 'Á' => 'A', 'á' => 'a', 'Â' => 'a', 'â' => 'a',
+        $ar = array('À' => 'A', 'à' => 'a', 'Á' => 'A', 'á' => 'a', 'Â' => 'a', 'â' => 'a',
             'Ã' => 'a', 'ã' => 'a', 'Ä' => 'A', 'ä' => 'a', 'Å' => 'A', 'å' => 'a',
             'Æ' => 'a', 'æ' => 'a', 'Ç' => 'C', 'ç' => 'c', 'Ð' => 'E', 'ð' => 'e',
             'È' => 'E', 'è' => 'e', 'É' => 'E', 'é' => 'e', 'Ê' => 'E',
@@ -368,7 +366,7 @@ if ($_GET['section'] == 'exportr') {
             'ô' => 'o', 'Õ' => 'O', 'õ' => 'o', 'Ö' => 'O', 'ö' => 'o', 'Ø' => 'O',
             'ø' => 'o', 'Œ' => 'O', 'œ' => 'o', 'ß' => 's', 'Þ' => 'T', 'þ' => 't',
             'Ù' => 'U', 'ù' => 'u', 'Ú' => 'U', 'ú' => 'u', 'Û' => 'U', 'û' => 'u',
-            'Ü' => 'U', 'ü' => 'u', 'Ý' => 'Y', 'ý' => 'y', 'Ÿ' => 'Y', 'ÿ' => 'y'];
+            'Ü' => 'U', 'ü' => 'u', 'Ý' => 'Y', 'ý' => 'y', 'Ÿ' => 'Y', 'ÿ' => 'y');
         if (count($allryad) > 0):
             if ($allryad[0]['user'] != $user->get_property('userID') and $user->get_property('gid') != 25) exit;
             $out = "#ID;Заголовок;Описание;Артикул;Цена;Размеры;Фото(url);Категория(Фильтр);Отключка\n";
@@ -440,7 +438,7 @@ if ($_GET['section'] == 'exportr') {
                                 $photo = PHP_slashes($item[6]);
                                 $cat = PHP_slashes(strip_tags(trim($item[7])));
                                 $tempOff = $item[8];
-                                $tempOff = str_replace(array("\r", "\n"), "", $tempOff);
+                                $tempOff = str_replace(["\r", "\n"], "", $tempOff);
                                 $id_zp = intval($_GET['value']);
                                 $testcheck = $DB->getOne("SELECT count(id) FROM sp_ryad WHERE id_zp='$id_zp' and position='$idpos'");
                                 if ($idpos > 0 and $testcheck > 0) {
@@ -554,7 +552,7 @@ if ($_GET['section'] == 'open' or $_GET['section'] == 'ryad' or $_GET['section']
         $allorder = $DB->getAll($query);
         $items_total_all = 0;
         $items_qnt_all = 0;
-        $allsize = [];
+        $allsize = array();
         foreach ($allorder as $aord) {
             $query = "SELECT * FROM `sp_ryad` WHERE `id` = " . $aord['id_ryad'];
             $allryad = $DB->getAll($query);
@@ -612,18 +610,18 @@ if ($_GET['section'] == 'open' or $_GET['section'] == 'ryad' or $_GET['section']
 		FROM `sp_order`
 		WHERE `sp_order`.`id_zp`='" . intval($_GET['value']) . "' and `sp_order`.`user`>''";
         $total_order_zp = $DB->getOne($sql);
-
-        $all_comments = $DB->getAll(' SELECT `comments`.*, `punbb_users`.`username` 
-                            FROM `comments` LEFT JOIN `punbb_users` ON `comments`.`user`=`punbb_users`.`id`
-                            WHERE `comments`.`news`= \'' . intval($nws) . '\' and `comments`.`table`=' . $table . '
-                            ORDER BY `comments`.`id` ASC');
-
+        $all_comments = $DB->getAll
+        ('
+		SELECT `comments`.*, `punbb_users`.`username` 
+		FROM `comments` LEFT JOIN `punbb_users` ON `comments`.`user`=`punbb_users`.`id`
+		WHERE `comments`.`news`= \'' . intval($nws) . '\' and `comments`.`table`=' . $table . '
+		ORDER BY `comments`.`id` ASC
+		');
         if ($testSubs > 0) {
             $lastcomm = $all_comments[(count($all_comments) - 1)]['id'];
             $sql = "UPDATE subs SET `lastcomm` = '$lastcomm' WHERE `id_post` = '$nws' and `user` = '{$user->get_property('userID')}' and `table` = '$table'";
             $DB->execute($sql);
         }
-
         $query = "SELECT * FROM `sp_delivery`";
         $delivery = getAllcache($query, 6000);
         $query = "SELECT sp_addpay.*, punbb_users.username, 
@@ -637,12 +635,13 @@ if ($_GET['section'] == 'open' or $_GET['section'] == 'ryad' or $_GET['section']
 		
 //Создаём список ВСЕХ пользователей в данной закупке для  новой версии таблицы "оплата". На основе sp_order, а не sp_addpay.
         $sql = "SELECT sp_order.user as orderUserNumber, punbb_users.username, sp_addpay.*,
-            (SELECT sum(sp_ryad.price*sp_order.kolvo)  FROM sp_order LEFT JOIN sp_ryad ON sp_order.id_ryad=sp_ryad.id 
+            (SELECT sum(sp_ryad.price*sp_order.kolvo)  FROM sp_order LEFT JOIN sp_ryad ON sp_order.id_ryad=sp_ryad.id
               WHERE sp_order.user=sp_addpay.user and sp_order.id_zp=sp_addpay.zp_id and (sp_order.status = 1 OR sp_order.status = 9)) AS tprice
             FROM sp_order
             LEFT JOIN punbb_users ON sp_order.user = punbb_users.id
             LEFT JOIN sp_addpay ON sp_order.user = sp_addpay.user AND sp_order.id_zp = sp_addpay.zp_id
-            WHERE sp_order.id_zp = ' ".intval($_GET['value'])." ' GROUP BY sp_order.user ORDER BY sp_addpay.id DESC";
+            WHERE sp_order.id_zp = ' ".intval($_GET['value'])." ' AND (sp_order.status = 1 OR sp_order.status = 8)
+			GROUP BY sp_order.user ORDER BY sp_addpay.id DESC";
         $all_payers = $DB->getAll($sql);
 
         $sql = "select * from `office` order by name ASC";
@@ -680,14 +679,13 @@ if ($_GET['section'] == 'open' or $_GET['section'] == 'ryad' or $_GET['section']
 if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
     $sql = "SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`curs`,`cities`.`city_name_ru`,
 			`sp_zakup`.`proc`,`sp_zakup`.`user`,`sp_zakup`.`type`,`sp_zakup`.`dost`,`sp_zakup`.`status`
-		FROM `sp_zakup`
-		LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
-		JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
-		WHERE `sp_zakup`.`id`=" . intval($_GET['value']);
+		    FROM `sp_zakup`
+		    LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
+		    JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
+		    WHERE `sp_zakup`.`id`=" . intval($_GET['value']);
     $openzakup = $DB->getAll($sql);
 
     if ($_GET['section'] == 'move') {
-        $idm = null;
         $move_sql = " and o.id = '$idm'";
         $sql = "SELECT `sp_zakup`.`id`,`sp_zakup`.`title`
 		FROM `sp_zakup`
@@ -701,7 +699,7 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
     //Добавляем o.oversize в запрос
     $query = "SELECT o.id, o.id_order, o.id_ryad, o.date, o.kolvo, o.oversize, o.message, o.color, o.status
 			, o.user, `punbb_users`.`username`, `punbb_users`.`group_id`, `punbb_users`.`wm`,
-			`sp_ryad`.`tempOff`, `sp_ryad`.`duble`, 
+			`sp_ryad`.`tempOff`,
 			(select office.name 
 				from office_set
 				left join office ON office.id =office_set.office
@@ -722,7 +720,6 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
 			  FROM sp_size 
 			  WHERE `sp_size`.`id` = " . $aord['id_order'];
         $allsize_tmp = $DB->getAll($query);
-
         $allryad[1] = $aord['date'];
         $allryad[2] = $aord['kolvo'];
         $allryad[3] = $allsize_tmp[0]['anonim'];
@@ -742,8 +739,9 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
         $allryad[17] = $aord['duble'];                                      //дублирование рядов. Т.е., количество рядов
         $allryad[18] = $allsize_tmp[0]['name'];                                       //количество позиций в ряде
         $allryad['id_order'] = $aord['id_order'];
-        $allryad['current_row'] = $allsize_tmp[0]['duble'];
-
+        $allryad['current_row'] = $allsize_tmp[0]['duble'];		
+		
+		
         $allsize[] = $allryad;
         $items_total_all = $items_total_all + ($allryad[0]['price'] * $aord['kolvo']);
     }
@@ -753,7 +751,7 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
 			FROM `sp_addpay` 
 			WHERE sp_addpay.zp_id = '" . intval($_GET['value']) . "' ORDER BY sp_addpay.id DESC";
     $addpay = $DB->getAll($query);
-    $addpayN = array();
+    $addpayN = [];
     foreach ($addpay as $item) {
         $addpayN[$item['user']] = $item;
     }
@@ -796,11 +794,11 @@ if ($_GET['section'] == 'transPay' OR $_GET['section'] == 'testPage') {
 if ($_GET['section'] == 'notification'){
     $id_zp = intval($_GET['value']);
 //Создание списка всех пользователей, участвующих в закупке
-        $sql = "SELECT sp_order.user, sp_order.id_zp, punbb_users.username,sp_addpay.user AS paidUser 
+        $sql = "SELECT sp_order.user, sp_order.id_zp, sp_order.status, punbb_users.username, sp_addpay.user AS paidUser 
                 FROM sp_order 
                 LEFT JOIN punbb_users ON punbb_users.id = sp_order.user
                 LEFT JOIN sp_addpay ON sp_order.user = sp_addpay.user AND sp_addpay.zp_id = sp_order.id_zp
-                WHERE sp_order.id_zp = '" .intval($_GET['value']). "' GROUP BY sp_order.user";
+                WHERE sp_order.id_zp = '" .intval($_GET['value']). "' AND (sp_order.status = 1 OR sp_order.status = 9) GROUP BY sp_order.user";
         $listAllUsers = $DB->getAll($sql);
 
 //Создание списка оплативших пользователей
@@ -822,11 +820,11 @@ if ($_GET['section'] == 'notification'){
                 if (!isset($forUser)){$error1 = "За кого уведомляешь то ?";}
                 elseif (!isset($bankName)){$error2 = "Банк я за тебя буду указывать ?";}
                 elseif (empty($summ)){$error3 = "А сумма то где ?";}
-                elseif (empty($whoPay)){$error4 = "И от кого денежки поступили, интересно ?";}
-                else {$sql = "INSERT INTO `sp_addpay` (`zp_id`,`user`,`date`,`summ`,`bankName`, `whoPay`) 
+                elseif (empty($whoPay)){$error4 = "И от кого денежки поступили, интересно ?";} else {
+                    $sql = "INSERT INTO `sp_addpay` (`zp_id`,`user`,`date`,`summ`,`bankName`, `whoPay`) 
 	                VALUES ('$id_zp','$forUser','$date','$summ','$bankName', '$whoPay')";
                     $DB->execute($sql);
-                    header('Location: /com/org/open/' .$id_zp);
+                    header('Location: /com/org/open/' . $id_zp);
                 }
 
         };
@@ -839,37 +837,27 @@ if ($_GET['section'] == 'move') {
         $id_o = intval($_POST['id_o']);
         $query = "SELECT o.* FROM `sp_order` AS o WHERE o.`id` = '$id_o'";
         $order = $DB->getAll($query);
-
         $query = "CREATE TEMPORARY TABLE foo AS SELECT * FROM sp_ryad WHERE id = '{$order[0]['id_ryad']}';";
         $DB->execute($query);
-
         $query = "UPDATE foo SET `id` = NULL,`id_zp`='$id_zp', `auto`='0', `spec`='0', `position`='0';";
         $DB->execute($query);
-
         $query = "INSERT INTO sp_ryad SELECT * FROM foo;";
         $DB->execute($query);
-
         $newid = $DB->id;
         $query = "DROP TABLE foo";
         $DB->execute($query);
-
         $query = "CREATE TEMPORARY TABLE foo2 AS SELECT * FROM sp_size WHERE id_ryad = '{$order[0]['id_ryad']}' 
-			      and duble='{$order[0]['duble']}' and user = ''{$order[0]['user']};";
+			and duble='{$order[0]['duble']}' and user = ''{$order[0]['user']};";
         $DB->execute($query);
-
         $query = "UPDATE foo2 SET id=NULL, duble=1, id_ryad=$newid;";
         $DB->execute($query);
-
         $query = "INSERT INTO sp_size SELECT * FROM foo2;";
         $DB->execute($query);
-
         $query = "DROP TABLE foo2";
         $DB->execute($query);
-
         $query = "UPDATE `sp_order` SET
 			`id_zp` = '$id_zp', `id_ryad` = '$newid' WHERE `sp_order`.`id` = '$id_o' LIMIT 1 ;";
         $DB->execute($query);
-
 //		$query = "UPDATE `office_set` SET
 //			`zp_id` = '$id_zp'
 //			 WHERE `office_set`.`user` = '' and `office_set`.`zp_id` = '' LIMIT 1 ;";
@@ -878,7 +866,6 @@ if ($_GET['section'] == 'move') {
 
     }
 }
-
 //todo Перенос заказов в другой ряд
 if ($_GET['section'] == 'ryad') {
     if ($_POST['move_orders']) {
@@ -935,7 +922,6 @@ if ($_GET['section'] == 'ryad') {
         $message = 'Низкий поклон <a href="/com/org/open/' . $id_zp . '/" class="link4">закупку</a>.';
     }
 }
-
 // далее фанкции закрытого доступа -----------------------------------------------------------------------------
 if ($user->get_property('userID') > 0):
     if ($_GET['section'] == 'multi') {
@@ -946,18 +932,17 @@ if ($user->get_property('userID') > 0):
                 $position = $DB->getOne("SELECT MAX(position) FROM sp_ryad WHERE id_zp='$idpost'");
                 $position = $position + 1;
                 $query = "INSERT INTO sp_ryad (user,id_zp,title,articul,message,mess_edit,price,size,duble,auto,spec,position,cat)
-			                VALUES('" . $user->get_property('userID') . "','$idpost','Товар #$position', '','','','0','','1','','1','$position','');";
+			              VALUES('" . $user->get_property('userID') . "','$idpost','Товар #$position', '','','','0','','1','','1','$position','');";
                 $DB->execute($query);
 
                 $lid = $DB->id;
                 if ($_FILES['photo']['size'][$i] > 0) {
-                    $filedata = [];
+                    $filedata = array();
                     $filedata['name'] = $_FILES['photo']['name'][$i];
                     $filedata['type'] = $_FILES['photo']['type'][$i];
                     $filedata['tmp_name'] = $_FILES['photo']['tmp_name'][$i];
                     $filedata['error'] = $_FILES['photo']['error'][$i];
                     $filedata['size'] = $_FILES['photo']['size'][$i];
-                    $setimg1 = null;
                     $imgpath_r = save_image_on_server($filedata, 'img/uploads/zakup/', $setimg1, 'r' . $lid, 'this');
                     if (!empty($imgpath_r[1])) {
                         $sql = "UPDATE `sp_ryad` SET 
@@ -978,7 +963,7 @@ if ($user->get_property('userID') > 0):
             $latIdMysql = $lock;
         } else {
             $query = "INSERT INTO sp_ryad (`user`,`id_zp`,`lock`)
-                        VALUES('" . $user->get_property('userID') . "','$id_zp','1');";
+			          VALUES('" . $user->get_property('userID') . "','$id_zp','1')";
             $DB->execute($query);
 
 //echo $query;exit;
@@ -1069,8 +1054,8 @@ if ($user->get_property('userID') > 0):
             if ($_POST['photodel'] == '1') {
                 @unlink($items[0]['photo']);
                 $sql = "UPDATE `sp_ryad` SET 
-			            `photo` = ''
-			            WHERE `sp_ryad`.`id` = " . $lid;
+			`photo` = ''
+			WHERE `sp_ryad`.`id` = " . $lid;
                 $DB->execute($sql);
             }
 //	if ($action=='addr') $last_id=$lid=$DB->id;
@@ -1222,16 +1207,15 @@ if ($user->get_property('userID') > 0):
             if ($items_order[0]['user'] > 0) $message .= "Ошибка: Данная позиция уже забронирована другим участником.<br/>";
             if ($items_order[0]['user'] == $user->get_property('userID')) $message .= 'Данная позиция уже забронирована Вами.<br/>';
         }
-/*        if ($action == 'editorder') { // need to work
+        if ($action == 'editorder') { // need to work
             $query = "SELECT * FROM `sp_order` WHERE `id` = '" . $idpost . "'"; // ORDER BY id DESC LIMIT $flatCount
-            $db = null;
             $db->setQuery($query);
-            $items = ($items = $db->loadObjectList()) ? $items : [];
+            $items = ($items = $db->loadObjectList()) ? $items : array();
             if ($items[0]->user <> $user->get('id') AND $user->get('id') <> 62) $err = 9;
-        }*/
+        }
         if (empty($message)) {
             /*$query = "UPDATE sp_addpay SET `status`=4 WHERE
-			 `user` = '" . $user->get_property('userID') . "' and
+			 `user` = '" . $user->get_property('userID') . "' and 
 			 `zp_id` = '" . intval($_GET['value']) . "';";
             $DB->execute($query);*/
             if ($action == 'order') {
@@ -1241,13 +1225,13 @@ if ($user->get_property('userID') > 0):
                 WHERE `sp_ryad`.`id` = " . $items_order[0]['id_ryad'];
                 $items_3 = $DB->getAll($query);
 
-                $query = "SELECT sp_order.kolvo FROM sp_order WHERE sp_order.id_zp ='" .$items_order[0]['id_zp']."' AND  sp_order.id_ryad = '" .$items[0]['id']. "'";
-                $haveOrdersArray = $DB->getAll($query);
+$query = "SELECT sp_order.kolvo FROM sp_order WHERE sp_order.id_zp ='" .$items_order[0]['id_zp']."' AND  sp_order.id_ryad = '" .$items[0]['id']. "'";
+$haveOrdersArray = $DB->getAll($query);
 
-                $haveOrders = 0;
-                foreach ($haveOrdersArray AS $value){
-                    $haveOrders+=$value['kolvo'];
-                }
+$haveOrders = 0;
+foreach ($haveOrdersArray AS $value){
+    $haveOrders+=$value['kolvo'];
+}
 
                 $diff = ($items_order[0]['name'] * $items_order[0]['duble']) - ($haveOrders + $kolvo);  //Проверяем разницу между количеством позиций в коробке и заказываемым количеством товара
 
@@ -1266,7 +1250,6 @@ if ($user->get_property('userID') > 0):
                         // todo в запросе к БД (записи) добавить последнюю цифру - данные для addrDelivery
                         // todo запрос добавляет квадратики с именами, отвечает за их количество
                         // todo добавляем запись данных о наценки за крупногабарит ( 0 между $kolvo и $dates )
-
                         if ($items_3[0]['type'] == 0 or $items_3[0]['type'] == 2) {
                             $query = "UPDATE sp_size SET `user` = '" . $user->get_property('userID') . "', `anonim` = '$anonim' WHERE `sp_size`.`id` =$idpost LIMIT 1 ;";
                             $DB->execute($query);
@@ -1288,7 +1271,6 @@ if ($user->get_property('userID') > 0):
                     // todo в запросе к БД (записи) добавить последнюю цифру - данные для addrDelivery
                     // todo запрос добавляет квадратики с именами, отвечает за их количество
                     // todo добавляем запись данных о наценки за крупногабарит ( 0 между $kolvo и $dates )
-
                     if ($items_3[0]['type'] == 0 or $items_3[0]['type'] == 2) {
                         $query = "UPDATE sp_size SET `user` = '" . $user->get_property('userID') . "', `anonim` = '$anonim' WHERE `sp_size`.`id` =$idpost LIMIT 1 ;";
                         $DB->execute($query);}
@@ -1408,15 +1390,13 @@ if ($user->get_property('userID') > 0):
 
             }
             if ($action == 'editorder') {
-                $pmessage = null;
-                $pmessage_edit = null;
                 $query = "UPDATE sp_order SET `message` = '$pmessage', `mess_edit` = '$pmessage_edit',
-			              `color` = '$color', `kolvo` = '$kolvo' WHERE `sp_order`.`id` =$idpost LIMIT 1 ;";
-                $DB->setQuery($query);
-                $DB->query();
+			`color` = '$color', `kolvo` = '$kolvo' WHERE `sp_order`.`id` =$idpost LIMIT 1 ;";
+                $db->setQuery($query);
+                $db->query();
                 $query = "UPDATE sp_size SET `anonim` = '$anonim' WHERE `sp_size`.`id` =" . $items[0]->id_order . " LIMIT 1 ;";
-                $DB->setQuery($query);
-                $DB->query();
+                $db->setQuery($query);
+                $db->query();
 
             }
         } // if err==0
@@ -1750,7 +1730,6 @@ $item['orgBuy']=0;
                 if ($_FILES['file1']['size'] > 0) {
                     $file1path = $DB->getOne("SELECT file1 FROM `sp_zakup` WHERE $user_sql `id`='$idzp'");
                     @unlink($file1path);
-                    $setfile = null;
                     $imgpath = save_file_on_server($_FILES['file1'], 'img/uploads/zakup/', $setfile, '1' . $idzp, $file1path);
                     if (!empty($imgpath[1])) {
                         $file_sql .= "`file1` = '" . $imgpath[1] . "',";
@@ -2008,7 +1987,6 @@ $item['orgBuy']=0;
                     $DB->execute($sql);
                 }
                 if ($_FILES['file1']['size'] > 0) {
-                    $setfile = null;
                     $imgpath = save_file_on_server($_FILES['file1'], 'img/uploads/zakup/', $setfile, '1' . $last_id);
                     if (!empty($imgpath[1])) {
                         $sql = "UPDATE `sp_zakup` SET 
@@ -2163,52 +2141,41 @@ $item['orgBuy']=0;
     if (!empty($_GET['value']) and $user->get_property('gid') >= 23 and ($_GET['section'] == 'reopenduble' || $_GET['section'] == 'reopendubord')) {
         $query = "SELECT `id`, `user` FROM `sp_zakup` WHERE `id` = " . intval($_GET['value']);
         $zakup = $DB->getAll($query);
-
         if ($zakup[0]['id'] > 0 and ($user->get_property('userID') == $zakup[0]['user'] or $user->get_property('gid') == 25)) {
             $id = intval($_GET['value']);
             $query = "CREATE TEMPORARY TABLE foo AS SELECT * FROM sp_zakup WHERE id = $id;";
             $DB->execute($query);
-
 			$date =  time();
             $query = "UPDATE foo SET id=NULL, status=1, date=$date;";
             if ($_GET['section'] == 'reopendubord') {
                 $query = "UPDATE foo SET id=NULL, status=3;";
             }
             $DB->execute($query);
-
             $query = "INSERT INTO sp_zakup SELECT * FROM foo;";
             $DB->execute($query);
-
             $newid = $DB->id;
             $query = "DROP TABLE foo";
             $DB->execute($query);
-
             $id = intval($_GET['value']);
             $query = "CREATE TEMPORARY TABLE foo AS SELECT * FROM sp_cat_sub WHERE zakup = $id;";
             $DB->execute($query);
-
             $query = "UPDATE foo SET zakup=$newid;";
             $DB->execute($query);
-
             $query = "INSERT INTO sp_cat_sub SELECT * FROM foo;";
             $DB->execute($query);
-
             $query = "DROP TABLE foo";
             $DB->execute($query);
-
             $sql = "SELECT title, foto, file1, file2, file3 FROM sp_zakup WHERE id ='$newid'";
             $tt = $DB->getAll($sql);
-
             if (strpos($tt[0]['title'], 'Выкуп:')) {
                 $t1 = explode('Выкуп:', $tt[0]['title']);
                 $baseName = $t1[0];
                 $t1 = intval(trim($t1[1])) + 1;
                 $tt[0]['title'] = $baseName . 'Выкуп: ' . $t1;
-                }
-            else
-                $tt[0]['title'] = $tt[0]['title'] . ' Выкуп: 2';
-                $tt[0]['title'] = PHP_slashes($tt[0]['title']);
-                $sql_f = '';
+
+            } else $tt[0]['title'] = $tt[0]['title'] . ' Выкуп: 2';
+            $tt[0]['title'] = PHP_slashes($tt[0]['title']);
+            $sql_f = '';
 
 //Дублирование картинок закупки
             if ($tt[0]['foto']) {
@@ -2221,7 +2188,7 @@ $item['orgBuy']=0;
                 $newFile = ($path_info['dirname'] . '/' . $newid . '.' .$path_info['extension']);
                 copy($sourceFile , $newFile);                                                                           //Копирование файла картинки закупки
                 $sql_f .= ", `foto` = '$newFile'";
-                }
+            }
 
 
             /*for ($a = 1; $a <= 3; $a++) {
@@ -2238,20 +2205,16 @@ $item['orgBuy']=0;
             }*/
             $sql = "UPDATE sp_zakup SET title = '{$tt[0]['title']}' $sql_f WHERE id = '$newid'";
             $DB->execute($sql);
-
             $new_id_zp = $newid;
             $sql = "UPDATE sp_zakup SET soonStop = 0 WHERE id = '$newid'";                                              // При дублировании закупки убираем статус "Скоро стоп"
             $DB->execute($sql);
-
             $sql = "UPDATE sp_zakup SET dateStop = Null WHERE id = '$newid'";                                           // При дублировании закупки убираем дату стопа
             $DB->execute($sql);
-
             $sql = "UPDATE sp_zakup SET inform = Null WHERE id = '$newid'";                                             // При дублировании закупки убираем информацию
             $DB->execute($sql);
-
+            /* --- */
             $sql = "SELECT * FROM sp_ryad WHERE id_zp = $id;";
             $idryad = $DB->getAll($sql);
-
             $i = 0;
             $sql_id = '';
             foreach ($idryad as $it) {
@@ -2259,17 +2222,20 @@ $item['orgBuy']=0;
                 $sql_id .= $it['id'];
                 if ($i < count($idryad)) $sql_id .= ',';
             }
-
-            $sql = "SELECT * FROM sp_size WHERE id_ryad IN ($sql_id) and duble=1 ORDER BY id ASC;";
+            $sql = "SELECT sp_size.* FROM sp_size WHERE id_ryad IN ($sql_id) ORDER BY id ASC;";
             $sizeArr = $DB->getAll($sql);
 
-            $NewSizeArr = array();
+            $NewSizeArr = [];
             foreach ($sizeArr as $it) {
                 $NewSizeArr[$it['id_ryad']][$it['id']] = $it;
             }
+
             if ($_GET['section'] == 'reopendubord') {
-                $sql = "SELECT * FROM sp_order WHERE id_zp = '{$zakup[0]['id']}' and status!=1;";
+                $sql = "SELECT sp_order.*, sp_ryad.title FROM sp_order 
+                        LEFT JOIN sp_ryad ON sp_ryad.id = sp_order.id_ryad
+                        WHERE sp_order.id_zp = '{$zakup[0]['id']}' and sp_order.status!=1 AND sp_order.status!=4";
                 $orderArr = $DB->getAll($sql);
+
                 $i = 0;
                 $sql_id_order = '';
                 $NewOrderArr = [];
@@ -2282,8 +2248,8 @@ $item['orgBuy']=0;
                     $it['id_zp'] = $newid;
                     $NewOrderArr[$it['id_order']] = $it;
                 }
-                $sql = "UPDATE sp_size SET user=NULL WHERE id IN (" . $sql_id_order . ")";
-                $DB->execute($sql);
+                /*$sql = "UPDATE sp_size SET user=NULL WHERE id IN ($sql_id_order);";
+                $DB->execute($sql);*/
 
                 $sql = "SELECT MAX(`id`) FROM `sp_size`; ";
                 $new_id_size = $DB->getOne($sql);
@@ -2295,17 +2261,16 @@ $item['orgBuy']=0;
                 $it['title'] = PHP_slashes($it['title']);
                 $it['articul'] = PHP_slashes($it['articul']);
                 $it['tempOff'] = PHP_slashes($it['tempOff']);
-                $sql = "INSERT INTO sp_ryad (`user`,`id_zp`,`title`,`articul`,`message`,`mess_edit`,`price`,`size`,`duble`,`auto`,`spec`,
-					    `position`,`photo`,`cat`,`tempOff`)
-                        VALUES ('{$it['user']}','{$newid}','{$it['title']}','{$it['articul']}','{$it['message']}','{$it['mess_edit']}',
-                        '{$it['price']}','{$it['size']}',
-                        '1','{$it['auto']}','{$it['spec']}','{$it['position']}','{$it['photo']}','{$it['cat']}', '{$it['tempOff']}')";  // Добавляем "временно нет в наличии" tempOff
+                $sql = "INSERT INTO sp_ryad (`user`,`id_zp`,`title`,`articul`,`message`,`mess_edit`,`price`,`size`,`duble`,
+                                             `auto`,`spec`, `position`,`photo`,`cat`,`tempOff`)
+				        VALUES ('{$it['user']}','{$newid}','{$it['title']}','{$it['articul']}','{$it['message']}','{$it['mess_edit']}',
+					            '{$it['price']}','{$it['size']}', '1','{$it['auto']}','{$it['spec']}','{$it['position']}',
+				                '{$it['photo']}','{$it['cat']}', '{$it['tempOff']}')";                                  // Добавляем "временно нет в наличии" tempOff
                 $DB->execute($sql);
-
 //echo $sql.'<br/>';
                 $newidr = $DB->id;
-                $filelist = array();
-                $filelist2 = array();
+                $filelist = [];
+                $filelist2 = [];
                 $path = "fmanager/uploads/zakup/{$id}/ryad/{$it['id']}/";
                 $newpath = "fmanager/uploads/zakup/{$new_id_zp}/ryad/{$newidr}/";
                 if ($handle = opendir($path)) {
@@ -2325,16 +2290,14 @@ $item['orgBuy']=0;
                     }
                     closedir($handle);
                 }
-
                 if ($_GET['section'] == 'reopendubord') {
                     $i = 0;
                     foreach ($NewSizeArr[$it['id']] as $NewSizeItem) {
                         $i++;
-                        $min_size_temp = null;
                         if ($min_size_temp > $NewSizeItem['id'] or $i == 1) $min_size_temp = $NewSizeItem['id'];
                     }
                     $new_id_size++;
-                    $NNewSizeArr = array();
+                    $NNewSizeArr = [];
                     foreach ($NewSizeArr[$it['id']] as $k => $v) {
                         if (!in_array($k, $arr_id_order)) $v['user'] = '';
                         $v['id'] = $new_id_size + ($v['id'] - ($min_size_temp - 1));
@@ -2342,30 +2305,33 @@ $item['orgBuy']=0;
                         $NewOrderArr[$k]['id_ryad'] = $newidr;
                         if (is_array($NewOrderArr[$k])) $NewOrderArr[$k]['id_order'] = $new_id_size + ($NewOrderArr[$k]['id_order'] - ($min_size_temp - 1));
                     }
-                    $NewSizeArr = $NNewSizeArr;
+
 
                 }
                 foreach ($NewSizeArr[$it['id']] as $NewSizeItem) {
                     if ($_GET['section'] == 'reopendubord') {
                         $news_size_id = $NewSizeItem['id'];
-                        $news_size_user = $NewSizeItem['user'];
+                        $news_size_user = 0;
                     } else {
                         $news_size_id = '';
                         $news_size_user = '';
                     }
+//Добавлено условие, чтобы в новую закупку переносились только заказы с sp_size.user = 0.
+// Иначе, количество пустых корзинок ("заказать") было равно количеству участников этого ряда в предыдущей закупке.
+                    if($NewSizeItem['user'] == 0){
 
-                    $sql = "INSERT INTO sp_size (`id`,`id_ryad`,`id_zp`,`name`,`user`,`duble`)
-					        VALUES ('$news_size_id','$newidr',$newid,'{$NewSizeItem['name']}','$news_size_user','1')";
-                    $DB->execute($sql);
-
-                    $new_id_size = $DB->id;
+                    }
                 }
-
+                $sql = "INSERT INTO sp_size (`id_ryad`,`id_zp`,`name`,`user`,`duble`, `anonim`)
+					            VALUES ('$newidr',$newid,'{$NewSizeItem['name']}','$news_size_user',1 , 0)";
+                $DB->execute($sql);
             }
 
- //todo Дублирование закупки с переносом невыкупленных заказов
+
+
+ //todo Перенос заказов, не включённых в счёт, в новую закупку
             if ($_GET['section'] == 'reopendubord') {
-                foreach ($NewOrderArr as $NewOrderItem) {
+/*                  foreach ($orderArr as $NewOrderItem) {
                     $sql = "INSERT INTO sp_order (`id`,`user`,`id_order`,`message`,`mess_edit`,`color`,`kolvo`,`oversize`,`date`,`uniqcod`,`id_zp`,
 					        `id_ryad`,`dateunix`,`status`,`addrDelivery`)
 					        VALUES ('','{$NewOrderItem['user']}','{$NewOrderItem['id_order']}','{$NewOrderItem['message']}','{$NewOrderItem['mess_edit']}',					                
@@ -2377,9 +2343,37 @@ $item['orgBuy']=0;
                     //todo Заменить в VALUES значение 000
 
                 }
-                $sql = "DELETE FROM sp_order WHERE id_zp = '{$zakup[0]['id']}' and status!=1;";
-                $DB->execute($sql);                                                                                     // todo Удаляем все заказы, кроме статуса=1 (включено в счёт) из текущей закупки
+*/
+
+// ----- todo Перенос всех заказов, кроме "включенных в счёт" и "Оплаченных" в новую закупку. Обновление таблицы sp_order. -------------------------------------------------------------
+                foreach ($orderArr as $NewOrderItem){
+
+                    $title = $NewOrderItem['title'];
+                    $title = '"' . PHP_slashes($title) . '"';
+//                    $title = PHP_slashes(htmlspecialchars(strip_tags(str_replace('"', '\'', $title))));
+
+                    $sql = "SELECT id FROM sp_ryad WHERE id_zp=$newid AND title = $title";
+                    $new_row = $DB->getOne($sql);
+
+                    $sql = " UPDATE sp_order 
+                            SET id_ryad = $new_row,
+                                id_zp = $newid
+                            WHERE sp_order.id_order = '{$NewOrderItem['id_order']}' ";
+                    $DB->execute($sql);
+
+                    $sql = "UPDATE sp_size 
+                            SET user =  '{$NewOrderItem['user']}',
+                                id_zp = $newid,
+                                id_ryad = $new_row,
+                                duble = 1
+                                WHERE id = '{$NewOrderItem['id_order']}' ";
+                    $DB->execute($sql);
             }
+
+//todo Удаление всех заказов, перенесённых в новую закупку, из текущей закупки
+                $sql = "DELETE FROM sp_order WHERE id_zp = '{$zakup[0]['id']}' AND status!=1 AND status!=4";
+//                $DB->execute($sql);
+            }  
 
 
             $sql = "SELECT id, photo FROM sp_ryad WHERE id_zp ='$new_id_zp'";
@@ -2942,38 +2936,37 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
     $userData = [];
 	
 //    if ($type == 1) $order = " and o.status>=0 and o.status!=7 and o.status!=2 and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику
-    if ($type == 1) $order = " and (o.status=8 or o.status=1) and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику, только заказы со статусом "в обработке"
-    if ($type == 2) $order = "and (o.status =1 or o.status=9) ORDER BY uo.username ASC"; //o.date сорт по заказам - r.title, сорт по пользователям - uo.username
-    if ($type == 3) $order = "and (o.status =1 or o.status=9)";
+    if ($type == 1) $order = " and o.status=8  and r.tempOff = 0 ORDER BY r.title ASC";  //поставщику, только заказы со статусом "в обработке"
+    if ($type == 2) $order = "and (o.status=1 or o.status=4 or o.status=9) ORDER BY uo.username ASC"; //o.date сорт по заказам - r.title, сорт по пользователям - uo.username
+    if ($type == 3) $order = "and (o.status=1 or o.status=4 or o.status=9)"; //печать этикеток
     if ($type == 4) $order = "ORDER BY uo.username DESC";
     if ($type == 5) $order = "GROUP BY uo.username";    //по пользователям
     if ($type == 6) $order = " and o.status = 8 ORDER BY r.title ASC";    //Экспорт только новых заказов
     if ($type == 7) $order = " and o.status>=0 and o.status!=7 and o.status!=2 ORDER BY r.title ASC";  //поставщику по группам товаров (подсчёт коробками)
 	
-    $sql = "SELECT o.id, o.user, o.kolvo, o.status as orderStatus, o.id_zp, s.name, s.name as size, r.id as rid, r.message, r.title, r.price, r.articul, r.duble, r.tempOff,
+    $sql = "SELECT o.id, o.user, o.kolvo,o.status as orderStatus, o.id_zp, s.name, s.name as size, r.id as rid, r.message, r.title, r.price, r.articul, r.duble, r.tempOff,
               o.kolvo, z.title as tzak, z.user as userzp, st.name as statname,u.username,  uo.username as unorder, uo.phone
-            FROM sp_order o
-            JOIN sp_size s ON o.id_order=s.id
-            JOIN sp_ryad r ON r.id=s.id_ryad
-            JOIN sp_zakup z ON o.id_zp=z.id
-            JOIN sp_status st ON z.status=st.id
-            JOIN punbb_users u ON z.user=u.id
-            JOIN punbb_users uo ON o.user=uo.id
-            WHERE z.id='$id' $order";
+		FROM sp_order o
+		JOIN sp_size s ON o.id_order=s.id
+		JOIN sp_ryad r ON r.id=s.id_ryad
+		JOIN sp_zakup z ON o.id_zp=z.id
+		JOIN sp_status st ON z.status=st.id
+		JOIN punbb_users u ON z.user=u.id
+		JOIN punbb_users uo ON o.user=uo.id
+		WHERE z.id='$id' $order";
     $allorder = $DB->getAll($sql);
 	
     if ($allorder[0]['userzp'] <> $user->get_property('userID') and $user->get_property('gid') <> 25) exit;
-
     $sql = "SELECT sum(r.price*o.kolvo*z.curs)
-            FROM sp_order o
-            JOIN sp_size s ON o.id_order=s.id
-            JOIN sp_ryad r ON r.id=s.id_ryad
-            JOIN sp_zakup z ON o.id_zp=z.id
-            JOIN punbb_users u ON z.user=u.id
-            JOIN punbb_users uo ON o.user=uo.id
-            WHERE z.id='$id' and o.status>=1 and o.status!=2 and o.status!=7 ";
+		FROM sp_order o
+		JOIN sp_size s ON o.id_order=s.id
+		JOIN sp_ryad r ON r.id=s.id_ryad
+		JOIN sp_zakup z ON o.id_zp=z.id
+		JOIN punbb_users u ON z.user=u.id
+		JOIN punbb_users uo ON o.user=uo.id
+		WHERE z.id='$id' and o.status>=1 and o.status!=2 and o.status!=7 
+		";
     $totalprice = $DB->getOne($sql);
-
     $query = "SELECT sp_addpay.*
 			FROM `sp_addpay` 
 			WHERE sp_addpay.zp_id = '$id' ORDER BY sp_addpay.id DESC";
@@ -3002,7 +2995,6 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
                 $dt = "{$md[2]}.{$md[1]}.20{$md[0]} {$ms[1]}";
             else: $dt = date('d.m.Y H:i', $num['dateunix']);
             endif;
-
             $num['color'] = str_replace(';', ',', htmlspecialchars_decode($num['color']));
             $num['title'] = str_replace(';', ',', htmlspecialchars_decode($num['title']));
             $num['tzak'] = str_replace(';', ',', htmlspecialchars_decode($num['tzak']));
@@ -3024,15 +3016,13 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
             /* Первоначальные данные для экспорта...
 		if($type==1) $out.="{$num['id']};{$num['unorder']};{$num['phone']};{$num['tzak']}. Орг:{$num['username']};{$num['title']};{$num['message']};{$num['kolvo']};{$num['color']};{$num['size']};{$num['articul']};{$dt};{$num['price']};{$num['price2']};$stO;{$num_dost};{$num['itogo']}\n";
 */
+            
             // экспорт по товарам {$num['size']}
             if ($type == 1) $out .= "{$num['unorder']};{$num['title']};{$num['articul']};{$num['kolvo']};{$num['duble']};{$num['size']}\n";
-
             // экспорт по пользователям
             if ($type == 2) $out .= "{$num['title']};{$num['articul']};{$num['kolvo']};{$num['unorder']}\n";
-
             // этикетки
             if ($type == 3) $userData[$num['user']][] = $num;
-
             //экспорт для раздачи
             if ($type == 4) $out .= "{$num['unorder']};{$num['phone']};{$num['tzak']}. Орг:{$num['username']};\n";
             //
@@ -3046,18 +3036,19 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
             $kolvo = $kolvo + $num['kolvo'];
         endforeach;
         if ($type == 3) {
+            
                 $out = ' <style>
                         .etiket {}
                         .etiket td {border:1px dashed #000;padding:3px;}
                         </style>
             <table class="etiket">
                             <tr>';
-                $i = 0;
-                foreach ($userData as $k => $v) {
-                    $i++;
-                    $userID = $k;
-                    $count = 0; // кол-во заказов
-                    $tovar = '';
+            $i = 0;
+            foreach ($userData as $k => $v) {
+                $i++;
+                $userID = $k;
+                $count = 0; // кол-во заказов
+                $tovar = '';
             $ordStat = $num['orderStatus'];
             $ordId = $num['id'];
                 foreach ($v as $num) {
@@ -3071,15 +3062,13 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
                             <br/><b><small>Организатор: {$num['username']}</small></b>
                             <br/><br/>
                             $tovar
-                         </td>";
-                    if ($i % 3 === 0) $out .= "</tr><tr>";
-                }
-
-                $out .= '</tr></table>';
-                echo $out;
-                exit;
-        }
-
+				</td>";
+                if ($i % 3 === 0) $out .= "</tr><tr>";
+            }
+            $out .= '</tr></table>';
+            echo $out;
+            exit;
+            }
 
 //		$out.=";;\nКол-во товаров:;$kolvo\n";
 //		$out.="Кол-во заказов:;".count($allorder)."\n";
@@ -3117,5 +3106,4 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
     endif;
     exit;
 }
-
 

@@ -3,4 +3,4 @@ $(document).ready(function(){
         let rel = $(this).attr("rel");
         let zakupStatus = $(this).val();
     });
-};
+});

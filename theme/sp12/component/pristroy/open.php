@@ -60,13 +60,13 @@
             <div class="open-slash" style="top:40px"></div>
         <? endif; ?>
         <span class="dateo"><?= date('d.m.Y', $hvastics[0]['date']) ?></span><br/>
------------------------------------------------------------------------------
-        <? $pth = 'img/uploads/pristroy/' . $hvastics[0]['id'];
+<!--------------------------------------------------------------------------------->
+        <? $pth = 'img/uploads/pristroy/' . $hvastics[0]['title'];
         $extension = ['.jpg', '.jpeg', '.gif', '.png'];
         $img_path = '';
         foreach ($extension as $ext) {
             if (file_exists($pth . $ext)) {
-                $img_path = '/images/pristroy/0/0/1/' . $hvastics[0]['id'] . $ext;
+                $img_path = '/img/uploads/pristroy/' . $hvastics[0]['title'] . $ext;
                 break;
             }
         }
@@ -74,7 +74,7 @@
         <? if ($img_path > ''): ?><img src="<?= $img_path ?>" alt="" /><br/><? endif ?>
 
         <?= $hvastics[0]['text'] ?>
-----------------------------------------------------------------------------
+<!-------------------------------------------------------------------------------->
         <p>
             <span class="status"><b>Цена: </b><?= $hvastics[0]['price'] ?> <?= $registry['valut_name'] ?></span><br/>
             <? if (!empty($hvastics[0]['size'])): ?>
@@ -118,32 +118,34 @@
                 <? //@include('comments.php');?>
             </div>
         <div class="line3"></div>
-        <? if ($user->get_property('gid') == 18 OR $hvastics[0]['user'] == $user->get_property('userID')): ?>
+        <? if ($user->get_property('gid') == 25 OR $hvastics[0]['user'] == $user->get_property('userID')): ?>
             <div class="menu-top5">У меня купили:</div>
             <div style="margin-top: 15px;">
                 <table style="width: 740px; text-align: center;">
                     <tr class="tab_order_name">
-<td>ID</td>                                                                                                             <!--todo Delete Me-->
-                    <td>Покупатель</td>
-                    <td>Кол-во</td>
-                    <td>Дата офомления</td>
-                    <td>Сумма</td>
-                    <td>Удалить</td>
-                    <td>Оплачено</td>
+                        <td>ID</td>
+                        <!--todo Delete Me-->
+                        <td>Покупатель</td>
+                        <td>Кол-во</td>
+                        <td>Дата офомления</td>
+                        <td>Сумма</td>
+                        <td>Удалить</td>
+                        <td>Оплачено</td>
                     </tr>
                     <? foreach ($ordered AS $order): ?>
                         <tr>
-<td style="text-align: left;"><?= $order['id']; ?></td>                                                                 <!--todo Delete Me-->
+                            <td style="text-align: left;"><?= $order['id']; ?></td>
+                            <!--todo Delete Me-->
                             <td style="text-align: left;"><?= $order['customer_name']; ?></td>
                             <td><?= $order['quantity']; ?></td>
                             <td><?= date('d/m/Y H.i', $order['date']); ?></td>
-                            <td><?=$hvastics[0]['price'] * $order['quantity'];?> </td>
-                            <td><a href="/com/pristroy/delOrder/<?=$order['id'];?>" class="link7 cross"
-                                onclick="return confirm_del_order(this)">удалить</a> </td>
-                            <td id="isPaid" <?if ($order['paid'] == 1):?> style="background-color: #3d803a" <?endif?> >
-                                <select class="paidStatus" rel="<?=$order['id']?>">
-                                    <option value="0" <?if ($order['paid'] == 0):?> selected <?endif?>> No </option>
-                                    <option value="1" <?if ($order['paid'] == 1):?> selected <?endif?>> Yes </option>
+                            <td><?= $hvastics[0]['price'] * $order['quantity']; ?> </td>
+                            <td><a href="/com/pristroy/delOrder/<?= $order['id']; ?>" class="link7 cross"
+                                   onclick="return confirm_del_order(this)">удалить</a></td>
+                            <td id="isPaid" <? if ($order['paid'] == 1): ?> style="background-color: #baffbd" <? endif ?> >
+                                <select class="paidStatus" rel="<?= $order['id'] ?>">
+                                    <option value="0" <? if ($order['paid'] == 0): ?> selected <? endif ?>> No</option>
+                                    <option value="1" <? if ($order['paid'] == 1): ?> selected <? endif ?>> Yes</option>
                                 </select>
                             </td>
                         </tr>
@@ -156,7 +158,7 @@
 
 <?if ($user->get_property('gid') >= 18):?>
     <div class="menu-top5">Я купил(а):</div>
-    <? $query = "SELECT `id`, `customer_id`, `title`, `customer_name`, `quantity`, `date` FROM `sp_pristroy_order` WHERE `id_pristroy`=" . $_GET['value'] . " 
+    <? $query = "SELECT `id`, `customer_id`, `title`, `customer_name`, `quantity`, `date`, `paid` FROM `sp_pristroy_order` WHERE `id_pristroy`=" . $_GET['value'] . " 
                 AND  `sp_pristroy_order`.`customer_id` =" .$user->get_property('userID'). " ORDER BY `sp_pristroy_order`.`id` ASC ";
                 $customer_section = $DB->getAll($query);?>
 
@@ -169,11 +171,11 @@
                 <td>Сумма</td>
             </tr>
             <? foreach ($customer_section AS $cust): ?>
-                <tr>
+                <tr <? if ($cust['paid'] == 1): ?> style="background-color: #baffbd" <? endif ?>>
                     <td><?= $cust['title']; ?></td>
                     <td><?= $cust['quantity']; ?></td>
                     <td><?= date('d/m/y H.i', $cust['date']); ?></td>
-                    <td><?=$hvastics[0]['price'] * $cust['quantity'];?></td>
+                    <td><?= $hvastics[0]['price'] * $cust['quantity']; ?></td>
                 </tr>
             <? endforeach; ?>
         </table>

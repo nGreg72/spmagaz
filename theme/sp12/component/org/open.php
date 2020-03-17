@@ -78,8 +78,9 @@
 				                                  WHERE `zp_id` = '" . intval($_GET['value']) . "' AND `status` = 1 GROUP BY User ORDER BY id DESC ";
                                                 $counter_confirm_user = $DB->getAll($query); ?>
 												
-												<? $query = "SELECT user FROM `sp_order` 
-				                                  WHERE `id_zp` = '" . intval($_GET['value']) . "' GROUP BY User ORDER BY id DESC ";
+												<? $query = "SELECT user, status FROM `sp_order` 
+				                                  WHERE `id_zp` = '" . intval($_GET['value']) . "' AND (sp_order.status = 1 OR sp_order.status = 9)
+				                                  GROUP BY User ORDER BY id DESC ";
                                                 $counter_all_user = $DB->getAll($query); ?>
 												
 												<a href="/com/org/status/<?= intval($_GET['value']) ?>/7"
@@ -476,8 +477,8 @@
 			  WHERE `id_ryad` IN ($out) 
 			  ORDER BY LENGTH(`sp_size`.`name`), CONVERT( `sp_size`.`name` , CHAR )";
             $itemsSZ = $DB->getAll($query);
-            $items_size_name = array();
-            $items_sizeTovar = array();
+            $items_size_name = [];
+            $items_sizeTovar = [];
             foreach ($itemsSZ as $item) {
                 $itemssize[$item['id_ryad']][] = $item;
                 if ($item['name'] && $item['duble'] == 1) $items_size_name[trim($item['name'])] = $item['name'];

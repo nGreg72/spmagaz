@@ -34,7 +34,4 @@
             <p><a href="javascript:history.back()" class="link4"><< Назад</a></p>
 
         <? endif ?>
-<? $test = new db_requests();
-$arr = $test->get_orders_for_move();
-$a = 1;?>
 <?endif?>

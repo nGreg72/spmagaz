@@ -29,6 +29,7 @@ if (get_magic_quotes_gpc()) {
     unset($process);
 }
 
+if (version_compare(PHP_VERSION, '7.0.0','>=')) include 'mysql.php';
 require_once('config.php');
 
 if($antiddos):

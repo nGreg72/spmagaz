@@ -23,6 +23,7 @@
 		<div id="copyright">
 		<br>
 		ИП Шлюха<br/>
+            <span>HS</span>
 		2014-<script language="JavaScript">document.write(new Date().getFullYear())</script> &copy; "<span>Сайт совместных покупок</span>"
 		</div>
 	</div>
