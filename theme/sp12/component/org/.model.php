@@ -1141,6 +1141,16 @@ if ($user->get_property('userID') > 0):
         $id_order = intval($_GET['value']);
         $query = "	SELECT `sp_size`.* FROM `sp_size` WHERE `sp_size`.`id` = " . $id_order;
         $items_order = $DB->getAll($query);
+
+        $sql = "SELECT sp_size.duble FROM sp_size WHERE sp_size.id_ryad = " . $items_order[0]['id_ryad'];
+        $all_dubles = $DB->getAll($sql);
+
+            $dubles = [];
+            foreach ($all_dubles AS $item){
+                array_push($dubles, $item['duble']);
+            };
+            $count_dubles_in_row = max($dubles);
+
         if (empty($id_order) OR count($items_order) == 0) $message .= 'Ошибка: Вы пытаетесь сделать заказ по несуществующей позиции.<br/>';
         if ($items_order[0]['user'] == $user->get_property('userID')) $message .= 'Ошибка: Данная позиция уже забронирована Вами.<br/>';
         if ($items_order[0]['user'] > 0) $message .= 'Ошибка: Данная позиция уже забронирована другим участником..<br/>';
@@ -1233,7 +1243,7 @@ foreach ($haveOrdersArray AS $value){
     $haveOrders+=$value['kolvo'];
 }
 
-                $diff = ($items_order[0]['name'] * $items_order[0]['duble']) - ($haveOrders + $kolvo);  //Проверяем разницу между количеством позиций в коробке и заказываемым количеством товара
+                $diff = ($items_order[0]['name'] * $count_dubles_in_row) - ($haveOrders + $kolvo);  //Проверяем разницу между количеством позиций в коробке и заказываемым количеством товара
 
                 $spSizeIdRyad = $items[0]['id'];
                 $spSizeIdzp = $items[0]['id_zp'];
@@ -2940,12 +2950,14 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
     if ($type == 2) $order = "and (o.status=1 or o.status=4 or o.status=9) ORDER BY uo.username ASC"; //o.date сорт по заказам - r.title, сорт по пользователям - uo.username
     if ($type == 3) $order = "and (o.status=1 or o.status=4 or o.status=9)"; //печать этикеток
     if ($type == 4) $order = "ORDER BY uo.username DESC";
-    if ($type == 5) $order = "GROUP BY uo.username";    //по пользователям
+    if ($type == 5) $order = "and o.status=1 GROUP BY uo.username";    //по пользователям
     if ($type == 6) $order = " and o.status = 8 ORDER BY r.title ASC";    //Экспорт только новых заказов
     if ($type == 7) $order = " and o.status>=0 and o.status!=7 and o.status!=2 ORDER BY r.title ASC";  //поставщику по группам товаров (подсчёт коробками)
 	
     $sql = "SELECT o.id, o.user, o.kolvo,o.status as orderStatus, o.id_zp, s.name, s.name as size, r.id as rid, r.message, r.title, r.price, r.articul, r.duble, r.tempOff,
-              o.kolvo, z.title as tzak, z.user as userzp, st.name as statname,u.username,  uo.username as unorder, uo.phone
+              o.kolvo, z.title as tzak, z.user as userzp, st.name as statname,u.username,  uo.username as unorder, uo.phone, 
+       (SELECT sum(sp_order.kolvo)  FROM sp_order WHERE 
+				    sp_order.id_ryad = s.id_ryad AND sp_order.status=8 GROUP BY sp_order.id_ryad) AS summ_orders 
 		FROM sp_order o
 		JOIN sp_size s ON o.id_order=s.id
 		JOIN sp_ryad r ON r.id=s.id_ryad
@@ -3012,13 +3024,18 @@ if ($_GET['section'] == 'export' and $user->get_property('gid') >= 23 and intval
             $num['price2'] = $num['price'] + round($num['price'] / 100 * $num['proc']);
             $num_dost = round(($num['dost'] / 100) * (($num['price'] * $num['curs'] * $num['kolvo']) / ($totalprice / 100)), 1);
             $num['itogo'] = $num_dost + $num['price2'];
+            $complited_box = (int)( $num['summ_orders'] / $num['size']);  /*Считаем полностью собранные коробки. Заказы в статусе "в обработке".*/
             // экспорт по товарам
             /* Первоначальные данные для экспорта...
 		if($type==1) $out.="{$num['id']};{$num['unorder']};{$num['phone']};{$num['tzak']}. Орг:{$num['username']};{$num['title']};{$num['message']};{$num['kolvo']};{$num['color']};{$num['size']};{$num['articul']};{$dt};{$num['price']};{$num['price2']};$stO;{$num_dost};{$num['itogo']}\n";
 */
             
             // экспорт по товарам {$num['size']}
-            if ($type == 1) $out .= "{$num['unorder']};{$num['title']};{$num['articul']};{$num['kolvo']};{$num['duble']};{$num['size']}\n";
+            if ($type == 1) $out .= "'<style>
+                        
+                         {border:1px dashed #000;padding:3px;}
+                        </style>'
+                        {$num['unorder']};{$num['title']};{$num['articul']};{$num['kolvo']};$complited_box;{$num['size']}\n";
             // экспорт по пользователям
             if ($type == 2) $out .= "{$num['title']};{$num['articul']};{$num['kolvo']};{$num['unorder']}\n";
             // этикетки
