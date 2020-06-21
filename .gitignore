@@ -1,0 +1,13 @@
+tmp/
+thumbs/
+version.txt
+img/
+cache/
+.idea/
+build/
+cgi-bin/
+dist/
+filemanager/
+fmanager/
+lib/cache2
+partner/theme/component/Files/
