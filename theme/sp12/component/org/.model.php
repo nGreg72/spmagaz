@@ -738,6 +738,7 @@ if ($_GET['section'] == 'vieworder' || $_GET['section'] == 'move') {
         $allryad[16] = $aord['tempOff'];                                          // временное отключения ряда
         $allryad[17] = $aord['duble'];                                      //дублирование рядов. Т.е., количество рядов
         $allryad[18] = $allsize_tmp[0]['name'];                                       //количество позиций в ряде
+        $allryad[19] = $allsize_tmp[0]['duble'];                                       //номер ряда, в котором оформлен заказ
         $allryad['id_order'] = $aord['id_order'];
         $allryad['current_row'] = $allsize_tmp[0]['duble'];		
 		

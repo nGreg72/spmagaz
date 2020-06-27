@@ -135,10 +135,11 @@
                             <u><?= $itm[0]['title'] ?></u>
                         </span>
                         </a>
-                        <br/>
+                        <br/>    / <?=$mark?> / <?=$itm['id_order']?>
 
                         <? if (!empty($itm[0]['articul'])):?><b>Артикул:</b> <?= $itm[0]['articul'] ?><br/><? endif; ?>
                         <? if (!empty($itm[7])):?><b>Размер:</b> <?= $itm[7] ?><br/><? endif; ?>
+                        <? if (!empty($itm[19])):?><b>Ряд:</b> <?= $itm[19] ?><br/><? endif; ?>
                         <? if (!empty($itm[8])):?><b>Цвет:</b> <?= $itm[8] ?><br/><? endif; ?>
                         <? if (!empty($itm[11]) && ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID'))):?>
                             <b>Доп.инфо:</b> <i><?= htmlspecialchars_decode($itm[6]) ?></i>
@@ -241,28 +242,41 @@
         <? if ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID')): ?>
             <p align="right">
                 <!--Вывод сбоку оуммы в оригинальной валюте И с учётом курса. Статус "В обработке"-->
-                <? if (!empty($obrOriginalPrice)): ?><span class="inProcessOriginalPrice-side"> <?= $obrOriginalPrice ?>
-                    у.е.</span><br/><? endif; ?>
+                <? if (!empty($obrOriginalPrice)): ?>
+                    <span class="inProcessOriginalPrice-side"> <?=$obrOriginalPrice?>у.е.</span>
+                    <br/>
+                <? endif; ?>
                 <!--                --><? // if (!empty($obr)): ?><!--<span class="process-side"> -->
                 <? //= $obr ?><!-- р</span><br/>--><? // endif; ?>
-                <span id="side-element-1" class="process-side"> <?= $obr ?> р</span><br/>
+                <span id="side-element-1" class="process-side"> <?= $obr ?> р</span>
+                <br/>
                 <!--Вывод сбоку оуммы в оригинальной валюте И с учётом курса. Статус "Включено в счёт"-->
-                <? if (!empty($incOriginalPrice)): ?><span class="includeOriginalPrice-side"><?= $incOriginalPrice ?>
-                    у.е.</span><br/><? endif; ?>
+                <? if (!empty($incOriginalPrice)): ?>
+                    <span class="includeOriginalPrice-side"><?= $incOriginalPrice ?>у.е.</span>
+                    <br/>
+                <? endif; ?>
                 <!--                --><? // if (!empty($inc)): ?><!--<span class="include-side">-->
                 <? //= $inc ?><!-- р</span><br/>--><? // endif; ?>
-                <span id="side-element-2" class="include-side"><?= $inc ?> р</span><br/>
+<!--                <span id="side-element-2" class="include-side">--><?//= $inc ?><!-- р</span>-->
+                <br/>
+                <span id="side-element-2" class="include-side"><?= $inc + ($inc / 100 * $openzakup[0]['proc']) ?> р</span>             <!--todo Включено в счёт с процентами-->
+                <br/>
+                <span id="side-element-2" class="includeOriginalPrice-side"><?= $inc ?> р</span>             <!--todo Включено в счёт без процентов-->
+                <br/>
 
                 <!--                --><? // if (!empty($den)): ?><!--<span class="deny-side">-->
                 <? //= $den ?><!-- р</span><br/>--><? // endif; ?>
-                <span id="side-element-3" class="deny-side"><?= $den ?> р</span><br/>
+                <span id="side-element-3" class="deny-side"><?= $den ?> р</span>
+                <br/>
                 <!--                --><? // if (!empty($noavil)): ?><!--<span class="noavil-side">-->
                 <? //= $noavil ?><!-- р</span><br/>--><? // endif; ?>
-                <span id="side-element-4" class="noavil-side"><?= $noavil ?> р</span><br/>
+                <span id="side-element-4" class="noavil-side"><?= $noavil ?> р</span>
+                <br/>
 
                 <!--                --><? //if (!empty($arrived)):?><!--<span class="arrived-side">-->
                 <? //=$arrived?><!--</span><br>--><? //endif;?>
-                <span id="side-element-5" class="arrived-side"><?= $arrived ?> р.</span><br>
+                <span id="side-element-5" class="arrived-side"><?= $arrived ?> р.</span>
+                <br>
 
                 <a href="/com/org/open/<?= intval($_GET['value']) ?>" class="backToOpen-side">Вернуться к закупке</a>
 
