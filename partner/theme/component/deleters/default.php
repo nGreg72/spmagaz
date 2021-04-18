@@ -11,12 +11,12 @@ $deleters = $DB->getAll($sql);?>
 <h1 style="padding-left: 100px;">Удаляльщики</h1>
 
 <div style="width: 1000px;">
-    <table style="font-size: 13px;">
+    <table style="font-size: 13px">
         <tr>
             <td>Пользователь</td>
-            <td style="text-align:center;">Закупка</td>
-            <td style="text-align:center;">Товар</td>
-            <td style="text-align: center;">Дата</td>
+            <td>Закупка</td>
+            <td>Товар</td>
+            <td>Дата</td>
             <td>Кол-во</td>
         </tr>
 

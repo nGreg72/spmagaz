@@ -101,10 +101,8 @@
                                     case 0 :
                                         echo $items_total_width;
                                         break;
+                                    case 2:
                                     case 1 :
-                                        echo $items_qnt_width;
-                                        break;
-                                    case 2 :
                                         echo $items_qnt_width;
                                         break;
                                 } ?>%
@@ -356,7 +354,7 @@
                       FROM `sp_size` 
                       LEFT JOIN `punbb_users` ON `sp_size`.`user`=`punbb_users`.`id`
                       WHERE `id_ryad` = " . $item_r['id'] . " AND `duble`=$count_duble 
-                      ORDER BY LENGTH(`sp_size`.`name`), CONVERT( `sp_size`.`name` , CHAR )";
+                      ORDER BY sp_size.id, CONVERT( `sp_size`.`name` , CHAR )";     //раньше было так LENGTH(`sp_size`.`name`), кнопки "заказать" появлялись в середине ряда
                 $items_size = $DB->getAll($query); ?>
 
                 <? $a = 0;
@@ -391,56 +389,65 @@
                     <tr class="ryad-grid">
 
                      <? foreach ($items_size AS $item_s):?>
-                            <? if ($item_s['user'] == 0 and $item_r['allblock'] != 1):
-                                if (($openzakup[0]['status'] == 3 or $openzakup[0]['status'] == 5) and $user->get_property('gid') != 7):?>
-                                    <td>
-    <!--                                --><?// if (!empty($item_s['name'])):?><!----><?//= $item_s['name'] ?><!--<br/>--><?// endif ?><!--                Количество позиций в ряде в квадратике "заказать"-->
-                                        <a href="/com/org/order/<?= $item_s['id'] ?>" title="добавить заказ">
-                                            <img src="/<?= $theme ?>images/cart.png" alt="заказать" border="0" height="30" width="30"/>
-                                            <br/>
-                                            <small>заказать</small>
-                                        </a>
-                                    <? elseif ($user->get_property('gid') == 7):?>
-                                    <td><span title="Вы в черном списке и не можете делать заказ!">X</span>
-                                    </td>
-                                  <? endif;
-                                  else:
-                                     $sql = "SELECT kolvo FROM `sp_order` WHERE `id_order` = '{$item_s['id']}' LIMIT 1";
-                                            $kolvo = $DB->getOne($sql);
+                         <? if ($item_s['user'] == 0 and $item_r['allblock'] != 1):
+                             if (($openzakup[0]['status'] == 3 or $openzakup[0]['status'] == 5) and $user->get_property('gid') != 7):?>
+                                 <td>
+                                 <!--                                --><?// if (!empty($item_s['name'])):?><!----><?//= $item_s['name'] ?><!--<br/>--><?// endif ?><!--                Количество позиций в ряде в квадратике "заказать"-->
+                                 <a href="/com/org/order/<?= $item_s['id'] ?>" title="добавить заказ">
+                                     <img src="/<?= $theme ?>images/cart.png" alt="заказать" border="0" height="30" width="30"/>
+                                     <br/>
+                                     <small>заказать</small>
+                                 </a>
+                             <? elseif ($user->get_property('gid') == 7):?>
+                                 <td><span title="Вы в черном списке и не можете делать заказ!">X</span>
+                                 </td>
+                             <? endif;
+                         else:
+                             $sql = "SELECT kolvo FROM `sp_order` WHERE `id_order` = '{$item_s['id']}' LIMIT 1";
+                             $kolvo = $DB->getOne($sql);
 
 //---- Подсветка заказов в статусе "Включено в счёт" -------------------------------------------------------------------
-                                  $temp = new dbrequests();
-                                  $mark = $temp->colorize_order($item_s['id']);
+                             $temp = new dbrequests();
+                             $mark_green = $temp->colorize_order($item_s['id']);
 
-                               if ($item_s['anonim'] == 0):
-                                   for ($ic = 0; $ic < $kolvo; $ic++): if ($kolvo > 1)?>
-                                        <td
-                                           <?if ($mark):?>
-                                           style="background-color: #d5f9d5"
-                                           <?endif;?> >
-                                            <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
-                                            <!--<a class="link4"><? /*=$item_s['username']*/ ?></a>-->
-                                            <a class="link4" title="<?= $item_s['username']?>" ><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
-                                       <br>
+//---- Подсветка заказов в статусе "В обработке" -------------------------------------------------------------------
+                             $tmp = new dbrequests();
+                             $mark_blue = $tmp->colorize_include($item_s['id']);
+
+                             if ($item_s['anonim'] == 0):
+                                 for ($ic = 0; $ic < $kolvo; $ic++): if ($kolvo > 1)?>
+                                     <td
+                                 <?if ($mark_green):?>
+                                     style="background-color: #d8f9d6"
+                                 <?elseif ($mark_blue):?>
+                                     style="background-color: #dfe7f9"
+                                 <?endif;?> >
+                                     <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
+                                     <!--<a class="link4"><? /*=$item_s['username']*/ ?></a>-->
+
+                                     <?if (/*$itm[3] == 1 OR*/ $user->get_property('gid') == 25 OR $itm[4] == $user->get_property('userID') OR $openzakup[0]['user'] == $user->get_property('userID')):?>
+                                     <a class="link4" title="<?= $item_s['username']?>" ><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
+                                     <br>
+                                     <?endif;?>
                                             <!--Имя пользователя в квадратике заказа-->
                                             <!--    <a href="/com/profile/default/<?= $item_s['user'] ?>" class="link4"><?= $item_s['username'] ?></a> -->
                                             <!--Заказавшие пользователи с ссылками на профиль-->
                                         </td>
-                                    <? endfor;
-                               elseif ( $item_s['anonim'] == 1 AND ($user->get_property('gid') == (25 or 23))):?>
+                                 <? endfor;
+                             elseif ( $item_s['anonim'] == 1 AND ($user->get_property('gid') == (25 or 23))):?>
 <!--                               анонимных пользователей видят админ и организаторы-->
-                                    <td>
-                                        <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
-                                        <a class="link4" title="<?= $item_s['username'] ?>"><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
-                                    </td>
-                               <?else:?>
-                                    <td>
-                                        <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
-                                        Аноним
-                                    </td>
-                               <? endif;
-                            endif;
-                        endforeach;?>
+                                 <td>
+                                     <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
+                                     <a class="link4" title="<?= $item_s['username'] ?>"><?= mb_substr($item_s['username'], 0, 10, 'UTF-8') ?></a>
+                                 </td>
+                             <?else:?>
+                                 <td>
+                                     <img src="/<?= $theme ?>images/check.png" alt="" border="0" title="заказ принят" height="16" width="16"/><br/>
+                                     Аноним
+                                 </td>
+                             <? endif;
+                         endif;
+                     endforeach;?>
                     </tr>
 
 
@@ -471,7 +478,7 @@
                          href="/com/org/edpos/<?= $item_r['id']; ?>/<?= intval($_GET['value']); ?>">изменить позиции</a>
                     - <a class="news_body_a5"
                          href="/com/org/rnone/<?= $item_r['id']; ?>/<?= intval($_GET['value']); ?>">
-                        <? if ($item_r['rnone'] == 0):?>нет в наличии<? else:?>есть в наличии<? endif ?>
+                        <? if ($item_r['rnone'] == 0): ?>нет в наличии<? else: ?>есть в наличии<? endif ?>
                     </a>
                     - <a class="news_body_a4" href="/com/org/delr/<?= $item_r['id']; ?>/<?= intval($_GET['value']); ?>"
                          onclick="if (!confirm('Вы подтверждаете удаление ряда?  --  <?= $item_r['title'] ?>)')) return false;">удалить</a>

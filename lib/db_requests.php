@@ -106,6 +106,20 @@ class dbrequests {
         return $response;
     }
 
+    /**
+     * @param $order_id
+     * @return int
+     * Подкрашиваем квадратики заказов со статусом "В обработке" на странице org/ryad
+     */
+    public function colorize_include($order_id){
+        global $DB;
+
+        $sql = "SELECT status FROM sp_order WHERE id_order = $order_id and status = 8";
+        $response = $DB->getOne($sql);
+
+        return $response;
+    }
+
     function move_orders_to_new_row($id_zp, $order_id){
 
         global $DB;
@@ -117,4 +131,15 @@ class dbrequests {
 
     }
 
+    function count_green_user($id_zp){
+
+        global $DB;
+
+        $query = "SELECT user, status FROM `sp_order`
+                    WHERE `id_zp` = $id_zp AND sp_order.status = 1
+                    GROUP BY User ORDER BY id DESC ";
+        $counter_green_user = $DB->getAll($query);
+
+        return $counter_green_user;
+    }
 }

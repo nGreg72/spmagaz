@@ -336,10 +336,10 @@ if(count($addpay[$zp['id']])==0):?>
 
                                         <!--К общеей сумме добавляем доплату и наценку-->
                                         <span style="font: bold 14px Arial;"
-                                              title="Итого к оплате">К оплате</span>: <span class="price"
-                                                                                                  id="price<?= $zp['id']; ?>">
+                                              title="Итого к оплате">Сумма заказов</span>: <span id="price<?= $zp['id']; ?>">
 	                                    <?= ceil(($totalzp[$zp['id']] * $zp['curs']) + round(($totalzp[$zp['id']] * $zp['curs']) / 100
-                                                * $zp['proc'], 2) + $userdost + $itap['doplata'] + $extraCharge); ?> <?= $registry['valut_name'] ?>
+                                                * $zp['proc'], 2) + $userdost + $itap['doplata'] + $extraCharge); ?> <?= $registry['valut_name'] ?></span>
+                                        <br>
 
                                         <?
                                         $res = new dbrequests();
@@ -347,13 +347,13 @@ if(count($addpay[$zp['id']])==0):?>
                                         ?>
 
                                         <?if ($ord['sizename'] > 1 ):?>
-                                        <br>
-                                        <span style="font: bold 14px Arial; color: green">Подтверждённые :</span> <?=$confirmed_order?> <?= $registry['valut_name'] ?>
+                                        <span style="font: bold 18px Arial; color: green">К оплате :</span>
+                                            <span class="price" style="font: bold 20px Arial;"><?= $confirmed_order ?> <?= $registry['valut_name'] ?></span>
                                         <?endif;?>
 
                                         <? if ($addpay[$zp['id']][0]['status'] == 1): ?>
                                             <span class="green">(оплачено)</span><? endif ?>
-			                                </span><br/>
+			                                <br/>
 
 <!--                                        --><?// if (($zp['status'] == 6 and ($zp['type'] == 0 or $zp['type'] == 2)) || ($_GET['status'] == 6 and $zp['type'] == 1)): ?>
                                         <?if ($zp['status'] == 6 OR $zp['status'] == 5 OR $zp['status'] == 8): ?>

@@ -565,7 +565,7 @@ if ($_GET['section'] == 'open' or $_GET['section'] == 'ryad' or $_GET['section']
             $allryad[1] = $aord['date'];
             $allryad[2] = $aord['kolvo'];
             $allryad[3] = $allsize_tmp[0]['anonim'];
-            $allryad[4] = $aord['user'];
+//            $allryad[4] = $aord['user'];
             $allryad[5] = $aord['username'];
             $allryad[6] = $allsize_tmp[0]['name'];
             $allryad[7] = $aord['color'];
@@ -1361,7 +1361,7 @@ foreach ($haveOrdersArray AS $value){
 
                 $sql = "SELECT LAST_INSERT_ID()";
                 $last_id = $DB->getOne($sql);
-                $query = "INSERT INTO sp_size VALUES('','$last_id','" . $size . "','" . $user->get_property('userID') . "','1','$anonim');";
+                $query = "INSERT INTO sp_size VALUES('','$last_id', '$idpost'  ,'" . $size . "','" . $user->get_property('userID') . "','1','$anonim');";
                 $DB->execute($query);
 
                 $sql = "SELECT LAST_INSERT_ID()";

@@ -58,27 +58,27 @@ foreach ($itemssize[$item_r['id']] as $item_s): ?>
 
 <!--    Общее количество сделанных заказов в ряде    -->
 <?
-$sql = "SELECT sp_order.kolvo FROM sp_order WHERE sp_order.id_ryad = " .$item_r['id'];
+$sql = "SELECT sp_order.kolvo FROM sp_order WHERE sp_order.id_ryad = " . $item_r['id'];
 $quantity = $DB->getAll($sql);
 
- $ordered = 0;
- foreach ($quantity as $qnt):
+$ordered = 0;
+foreach ($quantity as $qnt):
     $ordered = $ordered + $qnt['kolvo'];
- endforeach;
+endforeach;
 
 $compare = ($ordered / ($item_r['size'] * $item_r['duble']));
 $remains = ($item_r['size'] * $item_r['duble']) - $ordered;                                                        /*выводим остаток товара в коробке на главную страницу*/
 ?>
 
-<!--<div --><?// if ($i != 3): ?><!--style="margin:0 10px 10px 0; border: 1px solid red"--><?// endif ?><!-- class="item --><?// if ($i == 3):$i = 0; ?><!--closing--><?// endif ?><!--">-->
-<div style="margin:0 10px 10px 0;" class="item <?=$item_r['id'];?>">
+<!--<div --><? // if ($i != 3): ?><!--style="margin:0 10px 10px 0; border: 1px solid red"--><? // endif ?><!-- class="item --><? // if ($i == 3):$i = 0; ?><!--closing--><? // endif ?><!--">-->
+<div style="margin:0 10px 10px 0;" class="item <?= $item_r['id']; ?>">
     <a href="/com/org/ryad/<?= $_GET['value'] ?>/<?= $item_r['id'] ?>">
         <div>
             <? if (($item_r['size']) > 1 AND ($ordered) != 0) { ?>                        <!-- todo условие для закупок, у которых есть минималка в рядах AND кол-во заказов было больше нуля-->
                 <? if (is_int($compare)): ?>
                     <div style="width: 231px; height: 5px; background-color: #ec7c7f;"></div>    <!-- todo если число целое - коробка собрана. Можно добавить цифры, количетсво собранных шоколадок ($ordered)-->
                 <? else: ?>
-                    <div style="width: 231px; height: 5px; background-color: #63dd51;"></div><?=$item_r['duble']?>
+                    <div style="width: 231px; height: 5px; background-color: #63dd51;"></div><?= $item_r['duble'] ?>
                 <? endif; ?>
             <? } ?>
         </div>
@@ -94,14 +94,15 @@ $remains = ($item_r['size'] * $item_r['duble']) - $ordered;                     
 
     <span class="slash"></span>
     <div class="item-cont">
-        <a href="/com/org/ryad/<?= $_GET['value'] ?>/<?= $item_r['id'] ?>" class="link3"><?= $item_r['title'] ?></a>    <!--Имена позиций в закупке-->
+        <a href="/com/org/ryad/<?= $_GET['value'] ?>/<?= $item_r['id'] ?>" class="link3"><?= $item_r['title'] ?></a>
+        <!--Имена позиций в закупке-->
 
         <? if ($raz > 1): ?><b>Количество в упаковке</b>: <?= $raz ?><br/>
-            <? if ($remains ==! 0 ): ?><b>Осталось набрать</b>: <?= $remains ?>
-                <?if ($user->get_property('gid') == 25) :?>
-                    / <?=$remains * $item_r['price']?>р         <!--сумма за недостающий товар-->
-                <?endif;?>
-                <?else:?> <b style="color: red">Ряд набран</b>
+            <? if ($remains == !0): ?><b>Осталось набрать</b>: <?= $remains ?>
+                <? if ($user->get_property('gid') == 25) : ?>
+                    / <?= $remains * $item_r['price'] ?>р         <!--сумма за недостающий товар-->
+                <? endif; ?>
+            <? else: ?> <b style="color: red">Ряд набран</b>
             <? endif ?>
         <? endif ?>
 
@@ -114,14 +115,15 @@ $remains = ($item_r['size'] * $item_r['duble']) - $ordered;                     
                 руб)
             </strong></div>
     </div>
-    <?if ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID')):?>  <!--todo выбор tempOff виден только огам и админам-->
-    <div>
-        <form action="tempOffStatus" method="post">
-            <select class="tempOffChangeStatus" rel="<?=$item_r['id'];?>" style="position: absolute; bottom: 45px;">
-                <option value="0" <? if($item_r['tempOff'] == 0): ?> selected <?endif;?>> есть в наличии </option>
-                <option value="1" <? if($item_r['tempOff'] == 1): ?> selected <?endif;?>> нет в наличии </option>
-            </select>
-        </form>
-    </div>
-    <?endif;?>
+    <? if ($user->get_property('gid') == 25 OR $openzakup[0]['user'] == $user->get_property('userID')): ?>  <!--todo выбор tempOff виден только огам и админам-->
+        <div>
+            <form action="tempOffStatus" method="post">
+                <select class="tempOffChangeStatus" rel="<?= $item_r['id']; ?>"
+                        style="position: absolute; bottom: 45px;">
+                    <option value="0" <? if ($item_r['tempOff'] == 0): ?> selected <? endif; ?>> есть в наличии</option>
+                    <option value="1" <? if ($item_r['tempOff'] == 1): ?> selected <? endif; ?>> нет в наличии</option>
+                </select>
+            </form>
+        </div>
+    <? endif; ?>
 </div>

@@ -82,6 +82,8 @@
 				                                  WHERE `id_zp` = '" . intval($_GET['value']) . "' AND (sp_order.status = 1 OR sp_order.status = 9)
 				                                  GROUP BY User ORDER BY id DESC ";
                                                 $counter_all_user = $DB->getAll($query); ?>
+
+
 												
 												<a href="/com/org/status/<?= intval($_GET['value']) ?>/7"
                                                       <?if ($counter_all_user > $counter_confirm_user):?>
@@ -272,7 +274,7 @@
 
         <? if ($openzakup[0]['user'] == $user->get_property('userID') OR $user->get_property('gid') > 23):?>
             <span class="newstitle2">Оплата:</span>
-            <? if (count($addpay) > 0):?>
+            <? if (count($addpay) >= 0):?>
 
                 <table class="tab_order" width="100%">
                     <tr>

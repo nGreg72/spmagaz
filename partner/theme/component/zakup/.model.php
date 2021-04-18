@@ -21,16 +21,6 @@ if ($user->get_property('userID')==1 OR $user->get_property('gid')==25)
 		$DB->execute($query);
 
 	}
-
-        if ($_GET['section'] == "ajax"){
-            if ($_POST['event'] == "changeZakupStatus"){
-                $id = intval($_POST['id']);
-                $newZakupStatus = intval($_POST['newZakupStatus']);
-
-                $query = "UPDATE sp_zakup SET sp_zakup.status = $newZakupStatus WHERE sp_zakup.id = $id";
-                $DB->execute($query);
-            }
-        }
 	
 
 	if($_GET['section']=='add') {

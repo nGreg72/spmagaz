@@ -14,7 +14,8 @@
 
 
 if (get_magic_quotes_gpc()) {
-    $process = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
+    $process = [&$_GET, &$_POST, &$_COOKIE, &$_REQUEST];
+    
     while (list($key, $val) = each($process)) {
         foreach ($val as $k => $v) {
             unset($process[$key][$k]);
@@ -40,9 +41,16 @@ if($antiddos):
   $ad->start();
 endif;
 
-if ($timer_generate) {require_once('lib/timer.class.php');$timer = new timer();$timer->start_timer();}
+if ($timer_generate) {
+    require_once('lib/timer.class.php');$timer = new timer();$timer->start_timer();
+}
+
 require_once('sys/functions.php');
-if (count($_GET)>0 OR count($_POST)>0) require_once('sys/get.control.php');
+
+if (count($_GET)>0 OR count($_POST)>0) {
+    require_once('sys/get.control.php');
+}
+
 require_once('lib/access.class.php');
 require_once('lib/mail.class.php');
 require_once('lib/dbsql.class.php');
@@ -50,7 +58,9 @@ require_once('lib/class.get.image.php');
 //require_once('lib/cache.class.php');
 require_once('lib/markhtml.php');
 
-if ($component=='rss') require_once 'lib/rss.class.php';
+if ($component=='rss') {
+    require_once 'lib/rss.class.php';
+}
 
 
 $user=new flexibleAccess('',$settings);
@@ -62,32 +72,68 @@ online_check();getLicense();
 
 if ($_POST['export']==1):$export=1;include('export.php');endif;
 
-if ( $_GET['logout'] == 1 ) $user->logout('http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);
+if ( $_GET['logout'] == 1 ) {
+    $user->logout('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']);
+}
+
 if ( !$user->is_loaded())
 	{if ( isset($_REQUEST['uname']) && isset($_REQUEST['pwd'])){
 	  if ( !$user->login($_REQUEST['uname'],$_REQUEST['pwd'],$_REQUEST['remember'] )){
 	    $err=2;
 		 header('Location: /com/login/');
 	  }else header('Location: http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);}
-	} else 
-	if (!$user->is_active() AND $_GET['code']=='') $err=1; 
+	} else
+	if (!$user->is_active() AND $_GET['code']=='') {
+        $err = 1;
+    }
 
 @include($theme.'.model.php');
 
-if($component=='')$com_path='frontpage';else $com_path=$component;
-if($section=='')$sec_path='default';else $sec_path=$section;
-$contents_view=$theme.'component/'.$com_path.'/'.$sec_path.'.php';
-if(!file_exists($contents_view)) {$contents_view=$theme.'component/error/default.php';$exists=FALSE;} else $exists=TRUE;
-if(!$exists)$model='frontpage';else$model=$com_path;
+if($component=='') {
+    $com_path = 'frontpage';
+}
+else {
+    $com_path = $component;
+}
 
-$model_path=$theme.'component/'.$model.'/.model.php';;
-if(file_exists($model_path))include($model_path);
+if($section=='') {
+    $sec_path = 'default';
+}
+else {
+    $sec_path = $section;
+}
+
+$contents_view=$theme.'component/'.$com_path.'/'.$sec_path.'.php';
+
+if(!file_exists($contents_view)){
+    $contents_view=$theme.'component/error/default.php';$exists=FALSE;}
+else {
+    $exists = TRUE;
+}
+
+if(!$exists) {
+    $model = 'frontpage';
+}
+else {
+    $model = $com_path;
+}
+
+$model_path=$theme.'component/'.$model.'/.model.php';
+
+if(file_exists($model_path)) {
+    include($model_path);
+}
 
 $page_title=$com_path;
-if ($other_internal and !empty($component) and $exists and !$PrivateAccess) 
-	require_once $theme.'internal.php'; 
-	elseif($PrivateAccess and !$user->is_loaded()) require_once $theme.'login.php';
-	else require_once $theme.'index.php';
+if ($other_internal and !empty($component) and $exists and !$PrivateAccess) {
+    require_once $theme . 'internal.php';
+}
+elseif($PrivateAccess and !$user->is_loaded()) {
+    require_once $theme . 'login.php';
+}
+else {
+    require_once $theme . 'index.php';
+}
 
 if ($timer_generate) {
 	echo 'queries: '.count($DB->sqls).'<br/>';

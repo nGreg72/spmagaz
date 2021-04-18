@@ -33,9 +33,9 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         }                                                   //Дозаказы
         if ($_GET['status'] == 6) {
             $basketStatus = " `sp_order`.`user`='{$user->get_property('userID')}' 
-        AND `sp_zakup`.`status`=6 
-        AND (SELECT !count(sp_addpay.status) FROM `sp_addpay` 
-        WHERE `sp_addpay`.`zp_id`=`sp_zakup`.`id` and sp_addpay.`user`='{$user->get_property('userID')}') ";
+                            AND `sp_zakup`.`status`=6 
+                            AND (SELECT !count(sp_addpay.status) FROM `sp_addpay` 
+                            WHERE `sp_addpay`.`zp_id`=`sp_zakup`.`id` and sp_addpay.`user`='{$user->get_property('userID')}') ";
         }           //Неоплаченные
         if ($_GET['status'] == 7) {
             $basketStatus = " `sp_order`.`user`='{$user->get_property('userID')}' 
@@ -72,7 +72,9 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         foreach ($zakup as $zp):
             if ($zp['type'] == 1 and $_GET['status'] > 0) {
                 $statustovar = "and `sp_order`.`status` IN ($whord)";
-            } else $statustovar = '';
+            }
+            else $statustovar = '';
+
             $sql = "  select `sp_order`.*,`sp_order`.`message` AS `msg`,`sp_ryad`.`title`,`sp_ryad`.`articul`,`sp_ryad`.`autoblock`,`sp_ryad`.`allblock`,
                         `sp_ryad`.`message`,`sp_ryad`.`price`,`sp_ryad`.`tempOff` ,`sp_size`.`name` as `sizename`,
                         `sp_size`.`anonim`, (SELECT count(s.id) FROM sp_size s WHERE s.id_ryad = sp_size.id_ryad AND s.duble = sp_size.duble AND s.user = 0) AS colvoFreePos
@@ -344,20 +346,20 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0')=0";
         $id = intval($_GET['value']);
         if ($_GET['section'] == 'addpayExtra') $basketStatus = "and `sp_zakup`.`id`='$id'";
-        $sql = "	SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`paytype`,`sp_zakup`.`user`,`sp_zakup`.`text`,`sp_zakup`.`min`,`sp_zakup`.`proc`
-		,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
-		`sp_zakup`.`foto`,`sp_zakup`.`type`,`sp_zakup`.`office`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
-		(select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
-	    FROM `sp_zakup`
-	    LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
-	    JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
-	    JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
-	    JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
-	    WHERE `sp_order`.`user`='{$user->get_property('userID')}' AND `sp_zakup`.`id` = $id
-		$basketStatus	
-	    GROUP BY `sp_zakup`.`id`
-	    ORDER BY `sp_zakup`.`id` DESC";
+        $sql = "SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`paytype`,`sp_zakup`.`user`,`sp_zakup`.`text`,`sp_zakup`.`min`,`sp_zakup`.`proc`
+                ,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
+                `sp_zakup`.`foto`,`sp_zakup`.`type`,`sp_zakup`.`office`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
+                (select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
+                FROM `sp_zakup`
+                LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
+                JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
+                JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
+                JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
+                WHERE `sp_order`.`user`='{$user->get_property('userID')}' AND `sp_zakup`.`id` = $id $basketStatus	
+                GROUP BY `sp_zakup`.`id`
+                ORDER BY `sp_zakup`.`id` DESC";
         $zakup = $DB->getAll($sql);
+
 // todo Вытаскиваем Доставку из БД
         foreach ($zakup as $zp):
             if ($zp['type'] == 1 and $_GET['status'] > 0) {
@@ -382,21 +384,23 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             } else $order[$zp['id']] = null;
             $totalzp[$zp['id']] = $totalprice;
         endforeach;
+
         $sql = "SELECT `sp_addpay`.`transp` FROM `sp_addpay`	WHERE `zp_id`='" . $zp['id'] . "' and `user`='{$user->get_property('userID')}'";
         $addpay[$zp['id']] = $DB->getAll($sql);
     }
 // todo Отправка суммы за Доставку в базу summTransp (уведомление об оплате трансп расходов от пользователя)
     if ($_GET['section'] == 'addpayTransp' AND isset($_POST['shopidTransp'])) {
-        $summTransp = floatval($_POST['summTransp']);                                                                        // Извлекаем переменную об транспортых от пользователя
+        $summTransp = floatval($_POST['summTransp']);                                                                   // Извлекаем переменную об транспортых от пользователя
         $bankNameTransp = $_POST['bankNameTransp'];
         $whoPayTransp = $_POST['whoPayTransp'];
         $sql = "UPDATE `sp_addpay` 
-          SET
-            `transpUser` = '$summTransp',
-            `bankNameTransp` = '$bankNameTransp',
-            `whoPayTransp` = '$whoPayTransp' 
-          WHERE `zp_id`='" . $zp['id'] . "' and `user`='{$user->get_property('userID')}'";
+                SET
+                `transpUser` = '$summTransp',
+                `bankNameTransp` = '$bankNameTransp',
+                `whoPayTransp` = '$whoPayTransp' 
+                WHERE `zp_id`='" . $zp['id'] . "' and `user`='{$user->get_property('userID')}'";
         $DB->execute($sql);
+
         header("Location: /com/basket/?status=8");
         exit;
     }
@@ -407,17 +411,17 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
         $oldid = intval($_POST['oldid']);
         if ($oldid > 0) $fldop = 1;
         $sql = "	SELECT `sp_zakup`.`id`,`sp_zakup`.`title`,`sp_zakup`.`user`,`sp_zakup`.`text`,`sp_zakup`.`min`,`sp_zakup`.`proc`
-		,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
-		`sp_zakup`.`foto`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
-		(select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
-	FROM `sp_zakup`
-	LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
-	JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
-	JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
-	JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
-	WHERE `sp_zakup`.`id`='$idzp'
-	";
+                    ,`sp_zakup`.`rekviz`,`sp_zakup`.`status`,`sp_zakup`.`dost`,`sp_zakup`.`proc`,`sp_zakup`.`curs`,
+                    `sp_zakup`.`foto`,`punbb_users`.`username`,`cities`.`city_name_ru`, `sp_status`.`name`,
+                    (select count(`sp_order`.`id`) from `sp_order` where `sp_order`.`id_zp`=`sp_zakup`.`id`) AS `res`
+                    FROM `sp_zakup`
+                    LEFT JOIN `punbb_users` ON `sp_zakup`.`user`=`punbb_users`.`id`
+                    JOIN `cities` ON `cities`.`id_city`=`punbb_users`.`city`
+                    JOIN `sp_order` ON `sp_zakup`.`id`=`sp_order`.`id_zp`
+                    JOIN `sp_status` ON `sp_zakup`.`status`=`sp_status`.`id`
+                    WHERE `sp_zakup`.`id`='$idzp' ";
         $zakup = $DB->getAll($sql);
+
         if ($zakup[0]['dost'] > 0 and $zakup[0]['status'] > 3):
             $query = "SELECT `sp_ryad`.`price`,`sp_order`.`kolvo`
 	                  FROM `sp_order` 
@@ -445,32 +449,40 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $DB->execute($sql);
         }
         $card = PHP_slashes($_POST['desc']);
+
         $sql = "INSERT INTO `sp_addpay` (`zp_id`,`user`,`date`,`date_user`,`summ`,`card`,`status`,`fldop`,'tansp') 
-	VALUES ('$idzp','{$user->get_property('userID')}','$date','$date_user','$amount','$mess заказа с кошелька','1','$fldop')";
+	            VALUES ('$idzp','{$user->get_property('userID')}','$date','$date_user','$amount','$mess заказа с кошелька','1','$fldop')";
         $DB->execute($sql);
+
         $query = "UPDATE `punbb_users` SET `wm` = wm - '$ttsumm'
-		WHERE `punbb_users`.`id` ='{$user->get_property('userID')}' LIMIT 1 ;";
+		          WHERE `punbb_users`.`id` ='{$user->get_property('userID')}' LIMIT 1 ;";
         $DB->execute($query);
+
         $query = "UPDATE `punbb_users` SET `wm` = wm + '$ttsumm'
-		WHERE `punbb_users`.`id` ='{$zakup[0]['user']}' LIMIT 1 ;";
+		          WHERE `punbb_users`.`id` ='{$zakup[0]['user']}' LIMIT 1 ;";
         $DB->execute($query);
+
         $bl1 = $DB->getAll("SELECT wm, username FROM punbb_users WHERE id='{$user->get_property('userID')}' LIMIT 1");
-//print_r($bl1);exit;
+
         $bl2 = $DB->getAll("SELECT wm, username FROM punbb_users WHERE id='{$zakup[0]['user']}' LIMIT 1");
+
         $sql = "INSERT INTO sp_history (date, user, type, summ, mess, balance)
-		VALUES ('$date','{$user->get_property('userID')}','0','$ttsumm','Оплата закупки <a href=\'/com/org/open/$idzp\' class=\'link4\'>#$idzp</a>.
-			 Перевод организатору <a href=\'/com/user/default/{$zakup[0]['user']}\' class=\'link4\'>{$bl2[0]['username']}</a>','{$bl1[0]['wm']}')";
+		        VALUES ('$date','{$user->get_property('userID')}','0','$ttsumm','Оплата закупки <a href=\'/com/org/open/$idzp\' class=\'link4\'>#$idzp</a>.
+			            Перевод организатору <a href=\'/com/user/default/{$zakup[0]['user']}\' class=\'link4\'>{$bl2[0]['username']}</a>','{$bl1[0]['wm']}')";
         $DB->execute($sql);
+
         $sql = "INSERT INTO sp_history (date, user, type, summ, mess, balance)
 		VALUES ('$date','{$zakup[0]['user']}','1','$ttsumm','Оплата закупки <a href=\'/com/org/open/$idzp\' class=\'link4\'>#$idzp</a>.
 			 От пользователя <a href=\'/com/user/default/{$user->get_property('userID')}\' class=\'link4\'>{$bl1[0]['username']}</a>','{$bl2[0]['wm']}')";
         $DB->execute($sql);
+
         header("Location: /com/basket/?status=" . $_GET['status']);
     }
     if ($_GET['section'] == 'delorder') {
         // скрипт удаления товара из корзины
         $delorder = intval($_GET['value']);
-        $query = "SELECT `sp_order`.*, `punbb_users`.`email`,`punbb_users`.`username`,`sp_zakup`.`title`,`sp_zakup`.`alertnews`, sp_ryad.title as ryad_name
+        $query = "SELECT `sp_order`.*, `punbb_users`.`email`,`punbb_users`.`username`,`sp_zakup`.`title`,`sp_zakup`.`alertnews`, 
+                    sp_ryad.title as ryad_name, sp_ryad.duble
 		            FROM `sp_order` 
 		            LEFT JOIN `sp_zakup` ON `sp_order`.`id_zp`=`sp_zakup`.`id`
 		            LEFT JOIN `sp_ryad` ON `sp_ryad`.`id`=`sp_order`.`id_ryad`
@@ -489,15 +501,35 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
             $date = date('d M Y : H.i');
             $quantity = $order[0]['kolvo'];
 
+            //добавляем удаляльщиков в список, который в админке
             $sql = "INSERT INTO sp_deleters (`user`, `username`, `zp_id`, `zp_name`, `id_ryad`, `ryad_name`, `date`, `quantity`)
                     VALUES ('$del_user', '$del_username', '$del_zp_id', '$del_zp_name', '$del_id_ryad', '$del_ryad_name', '$date', '$quantity')";
             $DB->execute($sql);
 
+            //удаляем заказ пользователя из таблицы ryad
             $query = "DELETE FROM `sp_order` WHERE `id` = " . $delorder;
             $DB->execute($query);
 
+            //удаляем заказ пользователя из таблицы size
             $query = "DELETE FROM sp_size WHERE id = " . $order[0]['id_order'];
             $DB->execute($query);
+
+            // clean size and row tables
+            $sql = "SELECT sp_size.id, sp_size.duble FROM sp_size 
+            WHERE sp_size.id_ryad = $del_id_ryad AND sp_size.user = 0";
+            $row_size_to_change = $DB->getAll($sql);
+
+            $updated_duble = $row_size_to_change[0]['duble'] - 1;
+            $size_id_to_change = $row_size_to_change[0]['id'];
+            $ryad_to_change = $order[0]['id_ryad'];
+            $ryad_duble_to_change = $order[0]['duble'] - 1;
+
+            $sql = "UPDATE sp_size SET sp_size.duble = $updated_duble WHERE sp_size.id = $size_id_to_change";
+            $DB->execute($sql);
+
+            $sql = "UPDATE sp_ryad SET sp_ryad.duble = $ryad_duble_to_change WHERE sp_ryad.id = $ryad_to_change";
+            $DB->execute($sql);
+
 
             if ($order[0]['alertnews'] == 1) {
                 $emailsup = $DB->getOne('SELECT `setting`.`value` 
@@ -509,17 +541,16 @@ and sp_addpay.`user`='{$user->get_property('userID')}' and sp_addpay.`status`='0
                 $m->text_html = "text/html";
                 $m->Subject("Заказ удален пользователем - " . $_SERVER['HTTP_HOST']);
                 $m->Body("
-Здравствуйте,<br/>
-Это письмо отправлено вам сайтом: <a href=\"" . $_SERVER['HTTP_HOST'] . "\">" . $_SERVER['HTTP_HOST'] . "</a><br/>
-<p>
-Пользователь  <a href=\"http://" . $_SERVER['HTTP_HOST'] . "/com/profile/default/" . $user->get_property('userID') . "\">" . $user->get_property('username') . "</a> 
-удалил(а) свой заказ из вашей закупки \"" . $order[0]['title'] . "\".
-</p>
-<br/>
-Для просмотра закупки перейдите по ссылке:<br/>
-<a href=\"http://" . $_SERVER['HTTP_HOST'] . "/com/org/open/" . $order[0]['id_zp'] . "\">http://" . $_SERVER['HTTP_HOST'] . "/com/org/open/" . $order[0]['id_zp'] . "</a><br/>
-
-<p>Вы в любое время можете отключить уведомления о новых комментариях в настройках вашей закупки</p>");
+                    Здравствуйте,<br/>
+                    Это письмо отправлено вам сайтом: <a href=\"" . $_SERVER['HTTP_HOST'] . "\">" . $_SERVER['HTTP_HOST'] . "</a><br/>
+                    <p>
+                    Пользователь  <a href=\"http://" . $_SERVER['HTTP_HOST'] . "/com/profile/default/" . $user->get_property('userID') . "\">" . $user->get_property('username') . "</a> 
+                    удалил(а) свой заказ из вашей закупки \"" . $order[0]['title'] . "\".
+                    </p>
+                    <br/>
+                    Для просмотра закупки перейдите по ссылке:<br/>
+                    <a href=\"http://" . $_SERVER['HTTP_HOST'] . "/com/org/open/" . $order[0]['id_zp'] . "\">http://" . $_SERVER['HTTP_HOST'] . "/com/org/open/" . $order[0]['id_zp'] . "</a><br/>
+                    <p>Вы в любое время можете отключить уведомления о новых комментариях в настройках вашей закупки</p>");
                 $m->Priority(3);    // приоритет письма
                 $m->Send();    // а теперь пошла отправка
             }
